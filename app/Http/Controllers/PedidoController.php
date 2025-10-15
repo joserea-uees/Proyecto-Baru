@@ -10,23 +10,23 @@ use Illuminate\Support\Str;
 
 class PedidoController extends Controller
 {
-    public function create()
-    {
-        $categorias = \App\Models\Categoria::with('productos')->get();
-        return view('pedidos.create', compact('categorias'));
-    }
-
     public function store(Request $request)
     {
+        // Validar los datos del formulario
         $request->validate([
             'fecha_reserva' => 'required|date|after:now',
             'numero_personas' => 'required|integer|min:1',
-            'productos' => 'required|array',
-            'productos.*.id' => 'required|exists:productos,id',
-            'productos.*.cantidad' => 'required|integer|min:1',
+            'productos' => 'required|json',
             'comentarios' => 'nullable|string|max:500',
         ]);
 
+        // Decodificar productos del carrito
+        $productos = json_decode($request->productos, true);
+        if (empty($productos)) {
+            return redirect()->route('home')->withErrors(['productos' => 'El carrito está vacío']);
+        }
+
+        // Crear el pedido
         $pedido = Pedido::create([
             'user_id' => Auth::id(),
             'fecha_reserva' => $request->fecha_reserva,
@@ -36,18 +36,25 @@ class PedidoController extends Controller
             'comentarios' => $request->comentarios,
         ]);
 
-        foreach ($request->productos as $producto) {
+        // Guardar los detalles del pedido
+        foreach ($productos as $producto) {
             $pedido->detalles()->create([
                 'producto_id' => $producto['id'],
                 'cantidad' => $producto['cantidad'],
             ]);
         }
 
-        return redirect()->route('pedidos.ticket', $pedido->id)->with('success', 'Reserva creada exitosamente.');
+        // Redirigir al ticket con mensaje de éxito
+        return redirect()->route('pedidos.ticket', $pedido->id)->with('success', 'Reserva creada exitosamente. Código: ' . $pedido->codigo_ticket);
     }
 
     public function ticket(Pedido $pedido)
     {
+        // Asegurarse de que el usuario solo vea sus propios pedidos
+        if ($pedido->user_id !== Auth::id()) {
+            abort(403, 'No autorizado');
+        }
+
         return view('pedidos.ticket', compact('pedido'));
     }
 }

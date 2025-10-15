@@ -13,6 +13,11 @@
         <h1>BARÚ</h1>
         <p class="subtitle">Food Lounge</p>
         <h2>Ticket de Reserva</h2>
+        @if (session('success'))
+            <div class="alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
         <p><strong>Código del Ticket:</strong> {{ $pedido->codigo_ticket }}</p>
         <p><strong>Nombre:</strong> {{ $pedido->user->name }}</p>
         <p><strong>Código de Estudiante:</strong> {{ $pedido->user->codigo_estudiante }}</p>
@@ -28,8 +33,7 @@
         @if($pedido->comentarios)
             <p><strong>Comentarios:</strong> {{ $pedido->comentarios }}</p>
         @endif
-        <a href="{{ route('pedidos.create') }}" class="register-link">Hacer otra reserva</a>
-        <a href="{{ route('login') }}" class="register-link">Volver al Login</a>
+        <a href="{{ route('home') }}" class="register-link">Volver al Inicio</a>
     </div>
 </body>
 </html>

@@ -34,7 +34,7 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt(['codigo_estudiante' => $request->codigo_estudiante, 'password' => $request->contrasena], $request->has('remember'))) {
-            return redirect()->route('pedidos.create');
+            return redirect()->route('home');
         }
 
         return back()->withErrors(['codigo_estudiante' => 'Credenciales incorrectas']);

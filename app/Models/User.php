@@ -17,11 +17,6 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    public function getAuthIdentifierName()
-    {
-        return 'codigo_estudiante';
-    }
-
     public function pedidos()
     {
         return $this->hasMany(Pedido::class);

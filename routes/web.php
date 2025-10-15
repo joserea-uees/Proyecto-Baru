@@ -1,7 +1,15 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PedidoController;
 Route::get('/', function () {
     return view('login');
 });
+
+Route::get('/login', function () { return view('login'); })->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::get('/register', function () { return view('register'); })->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+Route::get('/pedidos/create', [PedidoController::class, 'create'])->name('pedidos.create')->middleware('auth');
+Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store')->middleware('auth');
+Route::get('/pedidos/{pedido}/ticket', [PedidoController::class, 'ticket'])->name('pedidos.ticket')->middleware('auth');

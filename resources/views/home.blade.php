@@ -14,11 +14,17 @@
         .product-card { transition: transform 0.2s; }
         .product-card:hover { transform: scale(1.02); }
         .category-btn.active { border-bottom: 2px solid #1a202c; }
+        .reservation-modal { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .reservation-modal.active { display: flex; opacity: 1; }
     </style>
+
+    {{-- Si usas Laravel con Vite, descomenta esta línea --}}
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
 </head>
 <body class="bg-gray-100">
+
     <div class="flex h-screen">
-        <!-- Sidebar with Logo -->
+        <!-- Sidebar -->
         <aside class="w-16 bg-white shadow-md flex flex-col items-center py-4">
             <div class="mb-8">
                 <i class="fas fa-utensils text-2xl text-gray-800"></i>
@@ -34,7 +40,7 @@
         <div class="flex-1 flex flex-col">
             <!-- Header -->
             <header class="bg-white shadow-sm p-4 flex justify-between items-center">
-                <h1 class="text-xl font-semibold text-gray-800">BARÚ</h1>
+                <h1 class="text-xl font-semibold text-gray-800">BARÚ Food Lounge</h1>
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-600">Bienvenido, {{ auth()->user()->name }}</span>
                     <div class="relative cursor-pointer" id="cartToggle">
@@ -44,7 +50,7 @@
                 </div>
             </header>
 
-            <!-- Content Area -->
+            <!-- Content -->
             <main class="flex-1 p-6 overflow-auto">
                 <!-- Search and Categories -->
                 <div class="mb-6">
@@ -111,6 +117,7 @@
                     <input type="hidden" name="numero_personas" value="1">
                     <input type="hidden" name="comentarios" value="">
                     <input type="hidden" name="productos" id="cartProductsInput" value="">
+                    <input type="hidden" name="reservation_code" id="reservationCodeInput" value="">
                     <button type="submit" class="w-full bg-gray-800 text-white py-2 rounded-md hover:bg-gray-700" id="reserveBtn">
                         <i class="fas fa-calendar-check"></i> Realizar Reserva
                     </button>
@@ -118,13 +125,31 @@
                 <p class="text-sm text-gray-500 mt-2 text-center">Confirma tu reserva para el almuerzo de mañana.</p>
             </div>
         </aside>
+
+        <!-- Reservation Confirmation Modal -->
+        <div class="reservation-modal fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center" id="reservationModal">
+            <div class="bg-white rounded-lg p-8 max-w-md w-full text-center">
+                <i class="fas fa-check-circle text-5xl text-green-500 mb-4"></i>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-2">¡Reserva Confirmada!</h2>
+                <p class="text-gray-600 mb-4">Tu reserva ha sido registrada exitosamente.</p>
+                <p class="text-lg font-bold text-gray-800">Código de Reserva:</p>
+                <p class="text-2xl font-mono text-gray-800 mb-6" id="reservationCode"></p>
+                <button class="bg-gray-800 text-white px-6 py-2 rounded-md hover:bg-gray-700" onclick="closeModal()">Volver al Menú</button>
+            </div>
+        </div>
     </div>
 
     <script>
+        console.log("Script de carrito cargado correctamente ✅");
+
         let cart = [];
         let subtotal = 0;
 
-        // Category filter
+        function generateReservationCode() {
+            return 'RES-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+        }
+
+        // Filtrar por categoría
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -136,7 +161,7 @@
             });
         });
 
-        // Search
+        // Buscar productos
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
             document.querySelectorAll('.product-card').forEach(card => {
@@ -145,7 +170,7 @@
             });
         });
 
-        // Add to cart
+        // Agregar al carrito
         document.querySelectorAll('.add-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const product = JSON.parse(btn.dataset.product);
@@ -166,7 +191,7 @@
             });
         });
 
-        // Update cart
+        // Actualizar carrito
         function updateCart() {
             const cartItems = document.getElementById('cartItems');
             const totals = document.getElementById('cartTotals');
@@ -207,8 +232,8 @@
                 `;
             });
             cartItems.innerHTML = itemsHtml;
-            document.getElementById('subtotal').textContent = $${subtotal.toFixed(2)};
-            document.getElementById('total').textContent = $${subtotal.toFixed(2)};
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('total').textContent = `$${subtotal.toFixed(2)}`;
             totals.style.display = 'block';
             reservation.style.display = 'block';
             badge.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -216,7 +241,6 @@
             document.getElementById('cartProductsInput').value = JSON.stringify(cart.map(item => ({ id: item.id, cantidad: item.quantity })));
         }
 
-        // Cart functions
         function updateQuantity(index, delta) {
             if (cart[index].quantity + delta > 0) {
                 subtotal += delta * cart[index].price;
@@ -241,15 +265,28 @@
             document.getElementById('cartPanel').classList.remove('active');
         }
 
+        function showModal(reservationCode) {
+            document.getElementById('reservationCode').textContent = reservationCode;
+            document.getElementById('reservationModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('reservationModal').classList.remove('active');
+            cart = [];
+            subtotal = 0;
+            updateCart();
+            closeCart();
+        }
+
         document.getElementById('cartToggle').addEventListener('click', showCart);
         document.getElementById('closeCart').addEventListener('click', closeCart);
 
-        document.getElementById('confirmForm').addEventListener('submit', function() {
+        document.getElementById('confirmForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             if (cart.length > 0) {
-                cart = [];
-                subtotal = 0;
-                updateCart();
-                closeCart();
+                const reservationCode = generateReservationCode();
+                document.getElementById('reservationCodeInput').value = reservationCode;
+                showModal(reservationCode);
             }
         });
     </script>

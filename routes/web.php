@@ -18,3 +18,4 @@ Route::get('/home', function () {
 })->name('home')->middleware('auth');
 Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store')->middleware('auth');
 Route::get('/pedidos/{pedido}/ticket', [PedidoController::class, 'ticket'])->name('pedidos.ticket')->middleware('auth');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

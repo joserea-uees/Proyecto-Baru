@@ -160,13 +160,6 @@
             box-shadow: 0 4px 12px rgba(0, 31, 63, 0.15);
             transition: none !important;
         }
-        /* Forzar texto blanco en header derecho */
-        .header-right span, .header-right i, .header-right button {
-            color: white !important;
-        }
-        .header-right button:hover i {
-            color: white !important;
-        }
     </style>
 
     {{-- Si usas Laravel con Vite, descomenta esta línea --}}
@@ -192,9 +185,11 @@
 
     <div class="flex h-screen -mt-32 relative">
         <!-- Sidebar -->
-        <aside class="w-16 bg-white/90 backdrop-blur-md shadow-lg flex flex-col items-center pb-6 z-10">
-            <nav class="flex flex-col space-y-6 pt-24">
-                <span class="sidebar-icon"><i class="fas fa-utensils text-2xl text-navy-900"></i></span>
+        <aside class="w-16 bg-white/90 backdrop-blur-md shadow-lg flex flex-col items-center pt-24 pb-6 z-10">
+            <div class="mb-8">
+                <i class="fas fa-utensils text-2xl text-navy-900 sidebar-icon"></i>
+            </div>
+            <nav class="flex flex-col space-y-6">
                 <a href="{{ route('home') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-home text-xl"></i></a>
                 <a href="#" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-calendar-alt text-xl"></i></a>
                 <a href="#" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-cog text-xl"></i></a>
@@ -209,16 +204,16 @@
                     <i class="fas fa-drumstick-bite text-xl text-white"></i>
                     <h1 class="text-xl font-semibold text-white font-serif">Menú del Día</h1>
                 </div>
-                <div class="flex items-center space-x-4 header-right">
-                    <span class="font-medium hidden md:block">¡Hola, {{ auth()->user()->name }}!</span>
+                <div class="flex items-center space-x-4">
+                    <span class="text-white/90 font-medium hidden md:block">¡Hola, {{ auth()->user()->name }}!</span>
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
-                        <button type="submit" class="transition-colors">
+                        <button type="submit" class="text-white/80 hover:text-white transition-colors">
                             <i class="fas fa-sign-out-alt text-lg"></i>
                         </button>
                     </form>
                     <div class="relative cursor-pointer" id="cartToggle">
-                        <i class="fas fa-shopping-cart text-lg"></i>
+                        <i class="fas fa-shopping-cart text-lg text-white/80"></i>
                         <span class="cart-badge absolute -top-1 -right-1 bg-navy-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center badge-pulse" id="cartBadge" style="display: none;">0</span>
                     </div>
                 </div>
@@ -316,7 +311,7 @@
                 <i class="fas fa-check-circle text-4xl text-green-600 mb-3"></i>
                 <h2 class="text-2xl font-semibold text-navy-900 mb-2">¡Reserva Confirmada!</h2>
                 <p class="text-navy-600 mb-4">Tu reserva ha sido registrada exitosamente.</p>
-                <h3 class="text-lg font-medium text-navy-700 mb-3">Código de Reserva:</h3>
+                <p class="text-lg font-medium text-navy-700 mb-3">Código de Reserva:</p>
                 <p class="text-xl font-mono text-navy-900 font-semibold mb-4 bg-navy-50 p-2 rounded-lg" id="reservationCode"></p>
                 <button class="bg-navy-900 text-white px-6 py-2 rounded-lg hover:bg-navy-800 transition-colors font-medium" onclick="closeModal()">
                     Volver al Menú
@@ -443,7 +438,7 @@
                     </div>
                 `;
             });
-            cartItems.innerHTML = itemsItems;
+            cartItems.innerHTML = itemsHtml;
             document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
             document.getElementById('total').textContent = `$${subtotal.toFixed(2)}`;
             totals.style.display = 'block';

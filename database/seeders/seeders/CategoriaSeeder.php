@@ -15,6 +15,7 @@ class CategoriaSeeder extends Seeder
         Categoria::create(['nombre' => 'Postres']);
         Categoria::create(['nombre' => 'Sanduches']);
         Categoria::create(['nombre' => 'Bowls']);
+        Categoria::create(['nombre' => 'Hamburguesas']);    
         Categoria::create(['nombre' => 'Papas']);
         Categoria::create(['nombre' => 'Almuerzos Diarios']);
     }

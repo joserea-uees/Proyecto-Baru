@@ -19,3 +19,7 @@ Route::get('/home', function () {
 Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store')->middleware('auth');
 Route::get('/pedidos/{pedido}/ticket', [PedidoController::class, 'ticket'])->name('pedidos.ticket')->middleware('auth');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::put('/password/update', [App\Http\Controllers\Auth\PasswordController::class, 'update'])->middleware('auth')->name('password.update');
+Route::get('/password/change', function () {
+    return view('change-password');
+})->middleware('auth')->name('password.change');

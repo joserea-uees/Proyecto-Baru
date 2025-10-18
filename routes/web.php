@@ -10,6 +10,8 @@ Route::get('/login', function () { return view('login'); })->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::get('/register', function () { return view('register'); })->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout'); // Asegúrate de que esta línea esté presente
+
 Route::get('/home', function () {
     $categorias = \App\Models\Categoria::with('productos')->get();
     return view('home', compact('categorias'));

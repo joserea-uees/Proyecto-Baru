@@ -68,14 +68,14 @@
                     @foreach ($categorias as $categoria)
                         @foreach ($categoria->productos as $producto)
                             <div class="product-card bg-white rounded-lg shadow-md p-4" data-category="{{ $categoria->id }}">
-                                <img src="{{ $producto->imagen ? asset('storage/' . $producto->imagen) : asset('img/placeholder.jpg') }}" alt="{{ $producto->nombre }}" class="w-full h-40 object-cover rounded-md">
+                                <img src="{{ $producto->imagen ? asset($producto->imagen) : asset('img/placeholder.jpg') }}" alt="{{ $producto->nombre }}" class="w-full h-40 object-cover rounded-md">
                                 <div class="mt-2">
                                     <h5 class="text-lg font-medium text-gray-800">{{ $producto->nombre }}</h5>
                                     <p class="text-sm text-gray-500">{{ $categoria->nombre }}</p>
                                     <p class="text-sm text-gray-600 mt-1">{{ $producto->descripcion ?? 'Sin descripción' }}</p>
                                     <div class="flex justify-between items-center mt-2">
                                         <span class="text-lg font-semibold text-gray-800">${{ number_format($producto->precio, 2) }}</span>
-                                        <button class="add-btn text-white bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-md" data-product='{"id":{{ $producto->id }},"name":"{{ $producto->nombre }}","price":{{ $producto->precio }},"image":"{{ $producto->imagen ? asset('storage/' . $producto->imagen) : asset('img/placeholder.jpg') }}"}'>
+                                        <button class="add-btn text-white bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-md" data-product='{"id":{{ $producto->id }},"name":"{{ $producto->nombre }}","price":{{ $producto->precio }},"image":"{{ $producto->imagen ? asset($producto->imagen) : asset('imgplaceholder.jpg') }}"}'>
                                             <i class="fas fa-plus"></i> Agregar
                                         </button>
                                     </div>

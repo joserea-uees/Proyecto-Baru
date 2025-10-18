@@ -13,5 +13,7 @@ class HomeController extends Controller
         $categorias = Categoria::with('productos')->get();
         $totalProductos = Producto::count();
         return view('home', compact('categorias', 'totalProductos'));
+        
     }
+    
 }

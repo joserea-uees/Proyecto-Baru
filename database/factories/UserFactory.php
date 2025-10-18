@@ -13,10 +13,10 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->name(),
-            'codigo_estudiante' => $this->faker->unique()->numerify('EST-######'), // e.g., EST-123456
+            'name' => 'Tester User',
+            'codigo_estudiante' => $this->faker->unique()->numerify('2023240011'), // e.g., EST-123456
             'email' => null, // Nullable, as per your requirement
-            'password' => Hash::make('password'), // Default hashed password
+            'password' => Hash::make('123456789'), // Default hashed password
             'remember_token' => Str::random(10),
         ];
     }

@@ -43,6 +43,12 @@
                 <h1 class="text-xl font-semibold text-gray-800">BARÚ Food Lounge</h1>
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-600">Bienvenido, {{ auth()->user()->name }}</span>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-sign-out-alt text-xl"></i>
+                        </button>
+                    </form>
                     <div class="relative cursor-pointer" id="cartToggle">
                         <i class="fas fa-shopping-cart text-gray-600"></i>
                         <span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1" id="cartBadge" style="display: none;">0</span>

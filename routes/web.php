@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
+
 Route::get('/', function () {
     return view('login');
 });
@@ -23,3 +26,8 @@ Route::put('/password/update', [App\Http\Controllers\Auth\PasswordController::cl
 Route::get('/password/change', function () {
     return view('change-password');
 })->middleware('auth')->name('password.change');
+Route::middleware(['auth'])->group(function () {
+    Route::put('/user/update-name', [ProfileController::class, 'updateName'])->name('user.update.name');
+    Route::delete('/user/delete', [ProfileController::class, 'deleteAccount'])->name('user.delete');
+});
+

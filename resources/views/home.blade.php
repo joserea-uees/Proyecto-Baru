@@ -60,13 +60,15 @@
             transform: translateY(-1px);
         }
         .reservation-modal { 
-            display: none; 
-            opacity: 0; 
-            transition: all 0.3s ease-in-out; 
+        display: none; 
+        opacity: 0; 
+        transition: opacity 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out; /* Agrega backdrop-filter a la transición */
+        backdrop-filter: blur(0px); /* Explícito en estado inicial */
         }
         .reservation-modal.active { 
-            display: flex; 
-            opacity: 1; 
+        display: flex; 
+        opacity: 1; 
+        backdrop-filter: blur(8px); /* Blur solo cuando está activo */
         }
         .add-btn {
             position: absolute;
@@ -187,9 +189,9 @@
         <!-- Sidebar -->
         <aside class="w-16 bg-white/90 backdrop-blur-md shadow-lg flex flex-col items-center pt-24 pb-6 z-10">
             <div class="mb-8">
-                <i class="fas fa-utensils text-2xl text-navy-900 sidebar-icon"></i>
             </div>
             <nav class="flex flex-col space-y-6">
+                <a class=" "></a>
                 <a href="{{ route('home') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-home text-xl"></i></a>
                 <a href="{{ route('password.change') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-cog text-xl"></i></a>
             </nav>
@@ -200,19 +202,19 @@
             <!-- Header -->
             <header class="bg-transparent p-4 flex justify-between items-center sticky top-0 z-20">
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-drumstick-bite text-xl text-white"></i>
-                    <h1 class="text-xl font-semibold text-white font-serif">Menú del Día</h1>
+                    <a class="fas fa-utensils text-2xl text-white sidebar-icon"></a>
+                    <h1 class="text-xl font-semibold text-white font-serif">Menú</h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span class="text-white/90 font-medium hidden md:block">¡Hola, {{ auth()->user()->name }}!</span>
+                    <span class="text-white text-white/90 font-medium hidden md:block">¡Hola, {{ auth()->user()->name }}!</span>
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="text-white/80 hover:text-white transition-colors">
-                            <i class="fas fa-sign-out-alt text-lg"></i>
+                            <i class="fas fa-sign-out-alt text-white"></i>
                         </button>
                     </form>
                     <div class="relative cursor-pointer" id="cartToggle">
-                        <i class="fas fa-shopping-cart text-lg text-white/80"></i>
+                        <i class="fas fa-shopping-cart text-white text-white/80"></i>
                         <span class="cart-badge absolute -top-1 -right-1 bg-navy-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center badge-pulse" id="cartBadge" style="display: none;">0</span>
                     </div>
                 </div>
@@ -304,20 +306,19 @@
             </div>
         </aside>
 
-        <!-- Reservation Confirmation Modal -->
-        <div class="reservation-modal fixed inset-0 bg-navy-900 bg-opacity-50 flex items-center justify-center z-50" id="reservationModal">
-            <div class="bg-white rounded-xl p-6 max-w-sm w-full text-center">
-                <i class="fas fa-check-circle text-4xl text-green-600 mb-3"></i>
-                <h2 class="text-2xl font-semibold text-navy-900 mb-2">¡Reserva Confirmada!</h2>
-                <p class="text-navy-600 mb-4">Tu reserva ha sido registrada exitosamente.</p>
-                <p class="text-lg font-medium text-navy-700 mb-3">Código de Reserva:</p>
-                <p class="text-xl font-mono text-navy-900 font-semibold mb-4 bg-navy-50 p-2 rounded-lg" id="reservationCode"></p>
-                <button class="bg-navy-900 text-white px-6 py-2 rounded-lg hover:bg-navy-800 transition-colors font-medium" onclick="closeModal()">
-                    Volver al Menú
-                </button>
-            </div>
-        </div>
+<!-- Reservation Confirmation Modal -->
+<div class="reservation-modal fixed inset-0 bg-navy-900 bg-opacity-90 flex items-center justify-center z-60" id="reservationModal">
+    <div class="bg-white rounded-xl p-6 max-w-sm w-full text-center border-2 border-[#001F3F]">
+        <i class="fas fa-check-circle text-4xl text-green-600 mb-3"></i>
+        <h2 class="text-2xl font-semibold text-navy-900 mb-2">¡Reserva Confirmada!</h2>
+        <p class="text-navy-600 mb-4">Tu reserva ha sido registrada exitosamente.</p>
+        <p class="text-lg font-medium text-navy-700 mb-3">Código de Reserva:</p>
+        <p class="text-xl font-mono text-navy-900 font-semibold mb-4 bg-navy-50 p-2 rounded-lg" id="reservationCode"></p>
+        <button class="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors font-medium" onclick="closeModal()">
+    Volver al Menú
+</button>
     </div>
+</div>
 
     <script>
         console.log("Script mejorado cargado ✅");
@@ -479,16 +480,35 @@
         }
 
         function showModal(reservationCode) {
-            document.getElementById('reservationCode').textContent = reservationCode;
-            document.getElementById('reservationModal').classList.add('active');
+        const modal = document.getElementById('reservationModal');
+        document.getElementById('reservationCode').textContent = reservationCode;
+        modal.classList.add('active');
+    
+        // Fuerza el blur inline al abrir (por si el CSS no lo pilla rápido)
+        setTimeout(() => {
+        modal.style.backdropFilter = 'blur(8px)';
+        }, 10); // Pequeño delay para que la clase se aplique primero
         }
 
         function closeModal() {
-            document.getElementById('reservationModal').classList.remove('active');
-            cart = [];
-            subtotal = 0;
-            updateCart();
-            closeCart();
+        const modal = document.getElementById('reservationModal');
+        modal.classList.remove('active');
+    
+        // Reset inmediato del backdrop-filter para evitar residuos
+        modal.style.backdropFilter = 'blur(0px)';
+    
+        // Listener para limpiar al final de la transición (opcional pero robusto)
+        const handleTransitionEnd = () => {
+        modal.style.backdropFilter = ''; // Limpia el estilo inline, deja que CSS lo maneje
+        modal.removeEventListener('transitionend', handleTransitionEnd);
+        };
+        modal.addEventListener('transitionend', handleTransitionEnd);
+    
+        // Limpia el carrito y cierra el panel
+        cart = [];
+        subtotal = 0;
+        updateCart();
+        closeCart();
         }
 
         document.getElementById('cartToggle').addEventListener('click', showCart);

@@ -162,6 +162,33 @@
             box-shadow: 0 4px 12px rgba(0, 31, 63, 0.15);
             transition: none !important;
         }
+        /* Estilos para los nuevos campos */
+        .date-input, .comments-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.5rem;
+            background: white;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+        }
+        .date-input:focus, .comments-textarea:focus {
+            outline: none;
+            border-color: #001F3F;
+            box-shadow: 0 0 0 3px rgba(0,31,63,0.1);
+        }
+        .comments-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        .date-section {
+            margin-bottom: 1rem;
+        }
+        .comments-section {
+            margin-bottom: 1rem;
+        }
     </style>
 
     {{-- Si usas Laravel con Vite, descomenta esta línea --}}
@@ -293,16 +320,28 @@
             <div class="reservation-section p-4 border-t border-navy-100" id="reservationSection" style="display: none;">
                 <form action="{{ route('pedidos.store') }}" method="POST" id="confirmForm">
                     @csrf
-                    <input type="hidden" name="fecha_reserva" value="{{ now()->addDay()->format('Y-m-d\TH:i') }}">
                     <input type="hidden" name="numero_personas" value="1">
-                    <input type="hidden" name="comentarios" value="">
                     <input type="hidden" name="productos" id="cartProductsInput" value="">
                     <input type="hidden" name="reservation_code" id="reservationCodeInput" value="">
+
+                    <!-- Sección de fecha de entrega -->
+                    <div class="date-section">
+                        <label for="fecha_reserva" class="block text-sm font-medium text-navy-700 mb-1">Fecha de entrega</label>
+                        <input type="date" id="fecha_reserva" name="fecha_reserva" required class="date-input" 
+                               min="{{ now()->addDay()->format('Y-m-d') }}" 
+                               value="{{ now()->addDay()->format('Y-m-d') }}">
+                    </div>
+
+                    <!-- Sección de comentarios -->
+                    <div class="comments-section">
+                        <label for="comentarios" class="comments-label block">Comentarios para el pedido</label>
+                        <textarea id="comentarios" name="comentarios" rows="3" class="comments-textarea" placeholder="Agrega cualquier comentario o instrucción especial para tu pedido..."></textarea>
+                    </div>
+
                     <button type="submit" class="w-full bg-navy-900 text-white py-3 rounded-lg hover:bg-navy-800 transition-colors font-medium" id="reserveBtn">
                         <i class="fas fa-calendar-check mr-2"></i> Realizar Reserva
                     </button>
                 </form>
-                <p class="text-sm text-navy-500 mt-2 text-center">Confirma tu reserva para el almuerzo de mañana.</p>
             </div>
         </aside>
 
@@ -450,6 +489,15 @@
                 badge.classList.add('badge-pulse');
             }
             document.getElementById('cartProductsInput').value = JSON.stringify(cart.map(item => ({ id: item.id, cantidad: item.quantity })));
+
+            // Establecer fecha por defecto a mañana si no está seteada
+            const fechaInput = document.getElementById('fecha_reserva');
+            if (!fechaInput.value) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const dateString = tomorrow.toISOString().split('T')[0];
+                fechaInput.value = dateString;
+            }
         }
 
         function updateQuantity(index, delta) {

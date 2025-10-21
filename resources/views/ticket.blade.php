@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <style>
+    
         body { 
             font-family: 'Inter', sans-serif; 
             background: linear-gradient(135deg, #001F3F 0%, #003366 100%);
@@ -77,6 +78,7 @@
                 <span>${{ number_format($pedido->total, 2) }}</span>
             </div>
         </div>
+        <h1>hola</h1>
         <div class="mt-6 text-center">
             <a href="{{ route('reservas') }}" class="inline-flex items-center px-4 py-2 text-navy-600 hover:text-navy-800 font-medium">
                 <i class="fas fa-arrow-left mr-2"></i>Volver a Reservas

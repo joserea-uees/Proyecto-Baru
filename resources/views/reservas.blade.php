@@ -131,35 +131,52 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="reservationsGrid">
-                    @foreach ($reservas as $reserva)
-                        <div class="reservation-card bg-white rounded-lg shadow-sm overflow-hidden" data-reservation-code="{{ $reserva->reservation_code }}">
-                            <div class="p-4">
-                                <div class="flex justify-between items-center mb-2">
-                                    <h5 class="text-lg font-medium text-navy-900">Reserva #{{ $reserva->reservation_code }}</h5>
-                                    <span class="status-badge status-{{ $reserva->estado }}">{{ ucfirst($reserva->estado) }}</span>
-                                </div>
-                                <p class="text-sm text-navy-500 mb-2">Fecha de entrega: {{ \Carbon\Carbon::parse($reserva->fecha_reserva)->format('d/m/Y') }}</p>
-                                <p class="text-sm text-navy-600 mb-2">Productos:</p>
-                                <ul class="text-sm text-navy-600 mb-3">
-                                    @foreach ($reserva->productos as $producto)
-                                        <li>{{ $producto->nombre }} (x{{ $producto->pivot->cantidad }}) - ${{ number_format($producto->pivot->cantidad * $producto->precio, 2) }}</li>
-                                    @endforeach
-                                </ul>
-                                @if($reserva->comentarios)
-                                    <p class="text-sm text-navy-600 mb-3"><strong>Comentarios:</strong> {{ $reserva->comentarios }}</p>
-                                @endif
-                                <div class="flex justify-between items-center">
-                                    <span class="text-xl font-semibold text-navy-900">${{ number_format($reserva->total, 2) }}</span>
-                                    @if($reserva->estado === 'pending')
-                                        <button class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" onclick="cancelReservation('{{ $reserva->reservation_code }}')">
-                                            <i class="fas fa-trash text-sm"></i> Cancelar
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
+    @forelse ($reservas as $reserva)
+        <div class="reservation-card bg-white rounded-lg shadow-sm overflow-hidden" data-reservation-code="{{ $reserva->reservation_code }}">
+            <div class="p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h5 class="text-lg font-medium text-navy-900">Reserva #{{ $reserva->reservation_code }}</h5>
+                    <span class="status-badge status-{{ $reserva->estado }}">{{ ucfirst($reserva->estado) }}</span>
                 </div>
+                <p class="text-sm text-navy-500 mb-2">Fecha de entrega: {{ \Carbon\Carbon::parse($reserva->fecha_reserva)->format('d/m/Y') }}</p>
+                <p class="text-sm text-navy-600 mb-2">Productos:</p>
+                <ul class="text-sm text-navy-600 mb-3">
+                    @foreach ($reserva->productos as $producto)
+                        <li>{{ $producto['cantidad'] }} x {{ $producto['id'] }} - ${{ number_format($producto['cantidad'] * $reserva->total, 2) }}</li>
+                    @endforeach
+                </ul>
+                @if($reserva->comentarios)
+                    <p class="text-sm text-navy-600 mb-3"><strong>Comentarios:</strong> {{ $reserva->comentarios }}</p>
+                @endif
+                <div class="flex justify-between items-center">
+                    <span class="text-xl font-semibold text-navy-900">${{ number_format($reserva->total, 2) }}</span>
+                    <div class="flex space-x-2">
+                        @if($reserva->estado === 'pendiente')
+                            <form action="{{ route('reservas.cancel') }}" method="POST" class="inline">
+                                @csrf
+                                <input type="hidden" name="reservation_code" value="{{ $reserva->reservation_code }}">
+                                <button type="submit" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50">
+                                    <i class="fas fa-trash text-sm"></i> Cancelar
+                                </button>
+                            </form>
+                        @endif
+                        <a href="{{ route('pedidos.ticket', $reserva->id) }}" class="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50">
+                            <i class="fas fa-ticket-alt text-sm"></i> Ver Ticket
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @empty
+        <div class="text-center text-navy-500 py-12">
+            <i class="fas fa-calendar-times fa-3x mb-4 text-navy-200"></i>
+            <p class="text-base mb-2">No tienes reservas registradas</p>
+            <a href="{{ route('home') }}" class="inline-flex items-center px-4 py-2 text-navy-600 hover:text-navy-800 font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Volver al Menú
+            </a>
+        </div>
+    @endforelse
+</div>
             </main>
         </div>
     </div>
@@ -185,40 +202,6 @@
                 });
             }, 300);
         });
-
-        function cancelReservation(reservationCode) {
-            if (confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
-                fetch('{{ route('reservas.cancel') }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ reservation_code: reservationCode })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const card = document.querySelector(`.reservation-card[data-reservation-code="${reservationCode}"]`);
-                        if (card) {
-                            const statusBadge = card.querySelector('.status-badge');
-                            statusBadge.classList.remove('status-pending');
-                            statusBadge.classList.add('status-cancelled');
-                            statusBadge.textContent = 'Cancelado';
-                            card.querySelector('button').remove();
-                        }
-                        alert('Reserva cancelada exitosamente.');
-                    } else {
-                        alert('Error al cancelar la reserva: ' + (data.message || 'Inténtalo de nuevo.'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al procesar la cancelación. Por favor, intenta de nuevo.');
-                });
-            }
-        }
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {

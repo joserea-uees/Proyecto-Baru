@@ -13,6 +13,7 @@ class CreatePedidosTable extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->string('reservation_code')->unique();
             $table->json('productos');
+            $table->string ('estado')->default('pendiente');
             $table->date('fecha_reserva');
             $table->text('comentarios')->nullable();
             $table->decimal('total', 8, 2);

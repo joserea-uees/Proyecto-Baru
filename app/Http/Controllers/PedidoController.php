@@ -2,59 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Pedido;
-use App\Models\Producto;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class PedidoController extends Controller
 {
     public function store(Request $request)
     {
-        // Validar los datos del formulario
-        $request->validate([
-            'fecha_reserva' => 'required|date|after:now',
-            'numero_personas' => 'required|integer|min:1',
+        $validated = $request->validate([
+            'reservation_code' => 'required|string',
             'productos' => 'required|json',
-            'comentarios' => 'nullable|string|max:500',
+            'fecha_reserva' => 'required|date|after:today',
+            'comentarios' => 'nullable|string',
         ]);
 
-        // Decodificar productos del carrito
+        // Calculate total based on productos
         $productos = json_decode($request->productos, true);
-        if (empty($productos)) {
-            return redirect()->route('home')->withErrors(['productos' => 'El carrito está vacío']);
+        $total = 0;
+        foreach ($productos as $producto) {
+            $product = \App\Models\Producto::find($producto['id']);
+            if ($product) {
+                $total += $product->precio * $producto['cantidad'];
+            }
         }
 
-        // Crear el pedido
+        // Obtener el user_id basado en el codigo_estudiante
+        $user = Auth::check() ? User::where('codigo_estudiante', Auth::user()->codigo_estudiante)->first() : null;
+        $userId = $user ? $user->id : null;
+
         $pedido = Pedido::create([
-            'user_id' => Auth::id(),
+            'user_id' => $userId,
+            'reservation_code' => $request->reservation_code,
+            'productos' => $request->productos,
             'fecha_reserva' => $request->fecha_reserva,
-            'numero_personas' => $request->numero_personas,
-            'estado' => 'pendiente',
-            'codigo_ticket' => 'RES-' . Str::random(8),
             'comentarios' => $request->comentarios,
+            'total' => $total,
         ]);
 
-        // Guardar los detalles del pedido
-        foreach ($productos as $producto) {
-            $pedido->detalles()->create([
-                'producto_id' => $producto['id'],
-                'cantidad' => $producto['cantidad'],
-            ]);
-        }
-
-        // Redirigir al ticket con mensaje de éxito
-        return redirect()->route('pedidos.ticket', $pedido->id)->with('success', 'Reserva creada exitosamente. Código: ' . $pedido->codigo_ticket);
-    }
-
-    public function ticket(Pedido $pedido)
-    {
-        // Asegurarse de que el usuario solo vea sus propios pedidos
-        if ($pedido->user_id !== Auth::id()) {
-            abort(403, 'No autorizado');
-        }
-
-        return view('pedidos.ticket', compact('pedido'));
+        return response()->json([
+            'success' => true,
+            'reservation_code' => $pedido->reservation_code,
+            'message' => 'Reserva creada exitosamente',
+        ]);
     }
 }

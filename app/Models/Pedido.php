@@ -2,26 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Pedido extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
+        'reservation_code',
+        'productos',
         'fecha_reserva',
-        'numero_personas',
-        'estado',
-        'codigo_ticket',
         'comentarios',
+        'total',
+    ];
+
+    protected $casts = [
+        'productos' => 'array',
+        'fecha_reserva' => 'date',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function detalles()
-    {
-        return $this->hasMany(DetallePedido::class);
     }
 }

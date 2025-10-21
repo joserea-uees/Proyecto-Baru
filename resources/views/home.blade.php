@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>BARÚ Food Lounge - Menú</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -60,15 +61,15 @@
             transform: translateY(-1px);
         }
         .reservation-modal { 
-        display: none; 
-        opacity: 0; 
-        transition: opacity 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out; /* Agrega backdrop-filter a la transición */
-        backdrop-filter: blur(0px); /* Explícito en estado inicial */
+            display: none; 
+            opacity: 0; 
+            transition: opacity 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out;
+            backdrop-filter: blur(0px);
         }
         .reservation-modal.active { 
-        display: flex; 
-        opacity: 1; 
-        backdrop-filter: blur(8px); /* Blur solo cuando está activo */
+            display: flex; 
+            opacity: 1; 
+            backdrop-filter: blur(8px);
         }
         .add-btn {
             position: absolute;
@@ -144,7 +145,6 @@
             transform: scale(1.05);
             background: #003366;
         }
-        /* Estilo adicional para asegurar visibilidad de la sección de reserva */
         .reservation-section {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -162,7 +162,6 @@
             box-shadow: 0 4px 12px rgba(0, 31, 63, 0.15);
             transition: none !important;
         }
-        /* Estilos para los nuevos campos */
         .date-input, .comments-textarea {
             width: 100%;
             padding: 0.75rem;
@@ -190,13 +189,8 @@
             margin-bottom: 1rem;
         }
     </style>
-
-    {{-- Si usas Laravel con Vite, descomenta esta línea --}}
-    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
 </head>
 <body class="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700">
-
-    <!-- Hero Section for Engagement -->
     <section class="hero-gradient h-56 flex items-center justify-center relative overflow-hidden">
         <div class="absolute inset-0 bg-black bg-opacity-20"></div>
         <div class="text-center text-white z-10">
@@ -213,20 +207,15 @@
     </section>
 
     <div class="flex h-screen -mt-32 relative">
-        <!-- Sidebar -->
         <aside class="w-16 bg-white/90 backdrop-blur-md shadow-lg flex flex-col items-center pt-24 pb-6 z-10">
-            <div class="mb-8">
-            </div>
+            <div class="mb-8"></div>
             <nav class="flex flex-col space-y-6">
-                <a class=" "></a>
                 <a href="{{ route('home') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-home text-xl"></i></a>
                 <a href="{{ route('password.change') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-cog text-xl"></i></a>
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <div class="flex-1 flex flex-col bg-white/80 backdrop-blur-sm">
-            <!-- Header -->
             <header class="bg-transparent p-4 flex justify-between items-center sticky top-0 z-20">
                 <div class="flex items-center space-x-3">
                     <a class="fas fa-utensils text-2xl text-white sidebar-icon"></a>
@@ -247,9 +236,7 @@
                 </div>
             </header>
 
-            <!-- Content -->
             <main class="flex-1 p-6 overflow-auto fade-in">
-                <!-- Search and Categories -->
                 <div class="mb-6">
                     <div class="relative mb-4">
                         <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-400"></i>
@@ -263,7 +250,6 @@
                     </div>
                 </div>
 
-                <!-- Products Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="productsGrid">
                     @foreach ($categorias as $categoria)
                         @foreach ($categoria->productos as $producto)
@@ -292,7 +278,6 @@
             </main>
         </div>
 
-        <!-- Cart Panel -->
         <aside class="cart-panel fixed right-0 top-0 h-full w-80 bg-white shadow-xl z-50" id="cartPanel">
             <div class="flex justify-between items-center p-4 border-b border-navy-100">
                 <h2 class="text-xl font-semibold text-navy-900">Mi Reserva</h2>
@@ -318,26 +303,20 @@
                 </div>
             </div>
             <div class="reservation-section p-4 border-t border-navy-100" id="reservationSection" style="display: none;">
-                <form action="{{ route('pedidos.store') }}" method="POST" id="confirmForm">
+                <form id="confirmForm">
                     @csrf
-                    <input type="hidden" name="numero_personas" value="1">
                     <input type="hidden" name="productos" id="cartProductsInput" value="">
                     <input type="hidden" name="reservation_code" id="reservationCodeInput" value="">
-
-                    <!-- Sección de fecha de entrega -->
                     <div class="date-section">
                         <label for="fecha_reserva" class="block text-sm font-medium text-navy-700 mb-1">Fecha de entrega</label>
                         <input type="date" id="fecha_reserva" name="fecha_reserva" required class="date-input" 
                                min="{{ now()->addDay()->format('Y-m-d') }}" 
                                value="{{ now()->addDay()->format('Y-m-d') }}">
                     </div>
-
-                    <!-- Sección de comentarios -->
                     <div class="comments-section">
                         <label for="comentarios" class="comments-label block">Comentarios para el pedido</label>
                         <textarea id="comentarios" name="comentarios" rows="3" class="comments-textarea" placeholder="Agrega cualquier comentario o instrucción especial para tu pedido..."></textarea>
                     </div>
-
                     <button type="submit" class="w-full bg-navy-900 text-white py-3 rounded-lg hover:bg-navy-800 transition-colors font-medium" id="reserveBtn">
                         <i class="fas fa-calendar-check mr-2"></i> Realizar Reserva
                     </button>
@@ -345,244 +324,249 @@
             </div>
         </aside>
 
-<!-- Reservation Confirmation Modal -->
-<div class="reservation-modal fixed inset-0 bg-navy-900 bg-opacity-90 flex items-center justify-center z-60" id="reservationModal">
-    <div class="bg-white rounded-xl p-6 max-w-sm w-full text-center border-2 border-[#001F3F]">
-        <i class="fas fa-check-circle text-4xl text-green-600 mb-3"></i>
-        <h2 class="text-2xl font-semibold text-navy-900 mb-2">¡Reserva Confirmada!</h2>
-        <p class="text-navy-600 mb-4">Tu reserva ha sido registrada exitosamente.</p>
-        <p class="text-lg font-medium text-navy-700 mb-3">Código de Reserva:</p>
-        <p class="text-xl font-mono text-navy-900 font-semibold mb-4 bg-navy-50 p-2 rounded-lg" id="reservationCode"></p>
-        <button class="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors font-medium" onclick="closeModal()">
-    Volver al Menú
-</button>
-    </div>
-</div>
+        <div class="reservation-modal fixed inset-0 bg-navy-900 bg-opacity-90 flex items-center justify-center z-60" id="reservationModal">
+            <div class="bg-white rounded-xl p-6 max-w-sm w-full text-center border-2 border-[#001F3F]">
+                <i class="fas fa-check-circle text-4xl text-green-600 mb-3"></i>
+                <h2 class="text-2xl font-semibold text-navy-900 mb-2">¡Reserva Confirmada!</h2>
+                <p class="text-navy-600 mb-4">Tu reserva ha sido registrada exitosamente.</p>
+                <p class="text-lg font-medium text-navy-700 mb-3">Código de Reserva:</p>
+                <p class="text-xl font-mono text-navy-900 font-semibold mb-4 bg-navy-50 p-2 rounded-lg" id="reservationCode"></p>
+                <button class="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors font-medium" onclick="closeModal()">
+                    Volver al Menú
+                </button>
+            </div>
+        </div>
 
-    <script>
-        console.log("Script mejorado cargado ✅");
+        <script>
+            console.log("Script mejorado cargado ✅");
 
-        let cart = [];
-        let subtotal = 0;
+            let cart = [];
+            let subtotal = 0;
 
-        function generateReservationCode() {
-            return 'RES-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-        }
-
-        // Filtrar por categoría con animación
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const category = btn.dataset.category;
-                document.querySelectorAll('.product-card').forEach((card, index) => {
-                    const shouldShow = (category === 'all' || card.dataset.category === category);
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(10px)';
-                    setTimeout(() => {
-                        card.style.display = shouldShow ? 'block' : 'none';
-                        if (shouldShow) {
-                            card.style.opacity = '1';
-                            card.style.transform = 'translateY(0)';
-                        }
-                    }, index * 50);
-                });
-            });
-        });
-
-        // Buscar con debounce para mejor UX
-        let searchTimeout;
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                const query = e.target.value.toLowerCase();
-                document.querySelectorAll('.product-card').forEach(card => {
-                    const title = card.querySelector('h5').textContent.toLowerCase();
-                    const shouldShow = title.includes(query);
-                    card.style.opacity = '0';
-                    setTimeout(() => {
-                        card.style.display = shouldShow ? 'block' : 'none';
-                        if (shouldShow) {
-                            card.style.opacity = '1';
-                        }
-                    }, 200);
-                });
-            }, 300);
-        });
-
-        // Agregar al carrito con feedback
-        document.querySelectorAll('.add-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const product = JSON.parse(btn.dataset.product);
-                const existing = cart.find(item => item.id === product.id);
-                if (existing) {
-                    existing.quantity += 1;
-                    subtotal += product.price;
-                } else {
-                    cart.push({ ...product, quantity: 1 });
-                    subtotal += product.price;
-                }
-                updateCart();
-                showCart();
-                btn.innerHTML = '<i class="fas fa-check"></i> Agregado';
-                btn.style.background = '#10B981';
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fas fa-plus"></i> Agregar';
-                    btn.style.background = '#001F3F';
-                }, 1500);
-            });
-        });
-
-        // Actualizar carrito con transiciones
-        function updateCart() {
-            const cartItems = document.getElementById('cartItems');
-            const totals = document.getElementById('cartTotals');
-            const reservation = document.getElementById('reservationSection');
-            const badge = document.getElementById('cartBadge');
-
-            if (cart.length === 0) {
-                cartItems.innerHTML = `
-                    <div class="empty-cart-message text-center text-navy-500 py-12">
-                        <i class="fas fa-utensils fa-3x mb-4 text-navy-200"></i>
-                        <p class="text-base mb-2">Tu carrito está vacío</p>
-                        <button class="inline-flex items-center px-4 py-2 text-navy-600 hover:text-navy-800 font-medium" onclick="closeCart()">
-                            <i class="fas fa-arrow-left mr-2"></i>Volver al Menú
-                        </button>
-                    </div>
-                `;
-                totals.style.display = 'none';
-                reservation.style.display = 'none';
-                badge.style.display = 'none';
-                document.getElementById('cartProductsInput').value = '';
-                return;
+            function generateReservationCode() {
+                return 'RES-' + Math.random().toString(36).substr(2, 8).toUpperCase();
             }
 
-            let itemsHtml = '';
-            cart.forEach((item, index) => {
-                itemsHtml += `
-                    <div class="flex items-center justify-between mb-4 p-3 bg-navy-50 rounded-lg">
-                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md">
-                        <div class="flex-1 ml-3">
-                            <h6 class="text-sm font-medium text-navy-900">${item.name}</h6>
-                            <p class="text-xs text-navy-500">${item.quantity}x $${item.price.toFixed(2)}</p>
-                            <div class="flex items-center mt-1">
-                                <button class="quantity-btn mr-1" onclick="updateQuantity(${index}, -1)">-</button>
-                                <span class="mx-2 text-sm font-medium">${item.quantity}</span>
-                                <button class="quantity-btn ml-1" onclick="updateQuantity(${index}, 1)">+</button>
-                            </div>
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const category = btn.dataset.category;
+                    document.querySelectorAll('.product-card').forEach((card, index) => {
+                        const shouldShow = (category === 'all' || card.dataset.category === category);
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(10px)';
+                        setTimeout(() => {
+                            card.style.display = shouldShow ? 'block' : 'none';
+                            if (shouldShow) {
+                                card.style.opacity = '1';
+                                card.style.transform = 'translateY(0)';
+                            }
+                        }, index * 50);
+                    });
+                });
+            });
+
+            let searchTimeout;
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    const query = e.target.value.toLowerCase();
+                    document.querySelectorAll('.product-card').forEach(card => {
+                        const title = card.querySelector('h5').textContent.toLowerCase();
+                        const shouldShow = title.includes(query);
+                        card.style.opacity = '0';
+                        setTimeout(() => {
+                            card.style.display = shouldShow ? 'block' : 'none';
+                            if (shouldShow) {
+                                card.style.opacity = '1';
+                            }
+                        }, 200);
+                    });
+                }, 300);
+            });
+
+            document.querySelectorAll('.add-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const product = JSON.parse(btn.dataset.product);
+                    const existing = cart.find(item => item.id === product.id);
+                    if (existing) {
+                        existing.quantity += 1;
+                        subtotal += product.price;
+                    } else {
+                        cart.push({ ...product, quantity: 1 });
+                        subtotal += product.price;
+                    }
+                    updateCart();
+                    showCart();
+                    btn.innerHTML = '<i class="fas fa-check"></i> Agregado';
+                    btn.style.background = '#10B981';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fas fa-plus"></i> Agregar';
+                        btn.style.background = '#001F3F';
+                    }, 1500);
+                });
+            });
+
+            function updateCart() {
+                const cartItems = document.getElementById('cartItems');
+                const totals = document.getElementById('cartTotals');
+                const reservation = document.getElementById('reservationSection');
+                const badge = document.getElementById('cartBadge');
+
+                if (cart.length === 0) {
+                    cartItems.innerHTML = `
+                        <div class="empty-cart-message text-center text-navy-500 py-12">
+                            <i class="fas fa-utensils fa-3x mb-4 text-navy-200"></i>
+                            <p class="text-base mb-2">Tu carrito está vacío</p>
+                            <button class="inline-flex items-center px-4 py-2 text-navy-600 hover:text-navy-800 font-medium" onclick="closeCart()">
+                                <i class="fas fa-arrow-left mr-2"></i>Volver al Menú
+                            </button>
                         </div>
-                        <button class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" onclick="removeItem(${index})">
-                            <i class="fas fa-trash text-sm"></i>
-                        </button>
-                    </div>
-                `;
-            });
-            cartItems.innerHTML = itemsHtml;
-            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-            document.getElementById('total').textContent = `$${subtotal.toFixed(2)}`;
-            totals.style.display = 'block';
-            reservation.style.display = 'block';
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            badge.textContent = totalItems;
-            badge.style.display = 'flex';
-            if (totalItems > 0) {
-                badge.classList.add('badge-pulse');
-            }
-            document.getElementById('cartProductsInput').value = JSON.stringify(cart.map(item => ({ id: item.id, cantidad: item.quantity })));
+                    `;
+                    totals.style.display = 'none';
+                    reservation.style.display = 'none';
+                    badge.style.display = 'none';
+                    document.getElementById('cartProductsInput').value = '';
+                    return;
+                }
 
-            // Establecer fecha por defecto a mañana si no está seteada
-            const fechaInput = document.getElementById('fecha_reserva');
-            if (!fechaInput.value) {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                const dateString = tomorrow.toISOString().split('T')[0];
-                fechaInput.value = dateString;
-            }
-        }
+                let itemsHtml = '';
+                cart.forEach((item, index) => {
+                    itemsHtml += `
+                        <div class="flex items-center justify-between mb-4 p-3 bg-navy-50 rounded-lg">
+                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md">
+                            <div class="flex-1 ml-3">
+                                <h6 class="text-sm font-medium text-navy-900">${item.name}</h6>
+                                <p class="text-xs text-navy-500">${item.quantity}x $${item.price.toFixed(2)}</p>
+                                <div class="flex items-center mt-1">
+                                    <button class="quantity-btn mr-1" onclick="updateQuantity(${index}, -1)">-</button>
+                                    <span class="mx-2 text-sm font-medium">${item.quantity}</span>
+                                    <button class="quantity-btn ml-1" onclick="updateQuantity(${index}, 1)">+</button>
+                                </div>
+                            </div>
+                            <button class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" onclick="removeItem(${index})">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                cartItems.innerHTML = itemsHtml;
+                document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+                document.getElementById('total').textContent = `$${subtotal.toFixed(2)}`;
+                totals.style.display = 'block';
+                reservation.style.display = 'block';
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                badge.textContent = totalItems;
+                badge.style.display = 'flex';
+                if (totalItems > 0) {
+                    badge.classList.add('badge-pulse');
+                }
+                document.getElementById('cartProductsInput').value = JSON.stringify(cart.map(item => ({ id: item.id, cantidad: item.quantity })));
 
-        function updateQuantity(index, delta) {
-            if (cart[index].quantity + delta > 0) {
-                subtotal += delta * cart[index].price;
-                cart[index].quantity += delta;
+                const fechaInput = document.getElementById('fecha_reserva');
+                if (!fechaInput.value) {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const dateString = tomorrow.toISOString().split('T')[0];
+                    fechaInput.value = dateString;
+                }
+            }
+
+            function updateQuantity(index, delta) {
+                if (cart[index].quantity + delta > 0) {
+                    subtotal += delta * cart[index].price;
+                    cart[index].quantity += delta;
+                    updateCart();
+                } else {
+                    removeItem(index);
+                }
+            }
+
+            function removeItem(index) {
+                const item = cart[index];
+                subtotal -= item.price * item.quantity;
+                cart.splice(index, 1);
                 updateCart();
-            } else {
-                removeItem(index);
             }
-        }
 
-        function removeItem(index) {
-            const item = cart[index];
-            subtotal -= item.price * item.quantity;
-            cart.splice(index, 1);
-            updateCart();
-        }
-
-        function showCart() {
-            document.getElementById('cartPanel').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeCart() {
-            document.getElementById('cartPanel').classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        function showModal(reservationCode) {
-        const modal = document.getElementById('reservationModal');
-        document.getElementById('reservationCode').textContent = reservationCode;
-        modal.classList.add('active');
-    
-        // Fuerza el blur inline al abrir (por si el CSS no lo pilla rápido)
-        setTimeout(() => {
-        modal.style.backdropFilter = 'blur(8px)';
-        }, 10); // Pequeño delay para que la clase se aplique primero
-        }
-
-        function closeModal() {
-        const modal = document.getElementById('reservationModal');
-        modal.classList.remove('active');
-    
-        // Reset inmediato del backdrop-filter para evitar residuos
-        modal.style.backdropFilter = 'blur(0px)';
-    
-        // Listener para limpiar al final de la transición (opcional pero robusto)
-        const handleTransitionEnd = () => {
-        modal.style.backdropFilter = ''; // Limpia el estilo inline, deja que CSS lo maneje
-        modal.removeEventListener('transitionend', handleTransitionEnd);
-        };
-        modal.addEventListener('transitionend', handleTransitionEnd);
-    
-        // Limpia el carrito y cierra el panel
-        cart = [];
-        subtotal = 0;
-        updateCart();
-        closeCart();
-        }
-
-        document.getElementById('cartToggle').addEventListener('click', showCart);
-        document.getElementById('closeCart').addEventListener('click', closeCart);
-
-        document.getElementById('confirmForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (cart.length > 0) {
-                const reservationCode = generateReservationCode();
-                document.getElementById('reservationCodeInput').value = reservationCode;
-                showModal(reservationCode);
+            function showCart() {
+                document.getElementById('cartPanel').classList.add('active');
+                document.body.style.overflow = 'hidden';
             }
-        });
 
-        // Close modal on outside click
-        document.getElementById('reservationModal').addEventListener('click', (e) => {
-            if (e.target.id === 'reservationModal') closeModal();
-        });
+            function closeCart() {
+                document.getElementById('cartPanel').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
 
-        // Close cart on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
+            function showModal(reservationCode) {
+                const modal = document.getElementById('reservationModal');
+                document.getElementById('reservationCode').textContent = reservationCode;
+                modal.classList.add('active');
+                setTimeout(() => {
+                    modal.style.backdropFilter = 'blur(8px)';
+                }, 10);
+            }
+
+            function closeModal() {
+                const modal = document.getElementById('reservationModal');
+                modal.classList.remove('active');
+                modal.style.backdropFilter = 'blur(0px)';
+                const handleTransitionEnd = () => {
+                    modal.style.backdropFilter = '';
+                    modal.removeEventListener('transitionend', handleTransitionEnd);
+                };
+                modal.addEventListener('transitionend', handleTransitionEnd);
+                cart = [];
+                subtotal = 0;
+                updateCart();
                 closeCart();
-                closeModal();
             }
-        });
-    </script>
+
+            document.getElementById('cartToggle').addEventListener('click', showCart);
+            document.getElementById('closeCart').addEventListener('click', closeCart);
+
+            document.getElementById('confirmForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (cart.length > 0) {
+                    const reservationCode = generateReservationCode();
+                    document.getElementById('reservationCodeInput').value = reservationCode;
+
+                    const formData = new FormData(document.getElementById('confirmForm'));
+                    fetch('{{ route('pedidos.store') }}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showModal(data.reservation_code);
+                        } else {
+                            alert('Error al guardar la reserva: ' + (data.message || 'Inténtalo de nuevo.'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al procesar la reserva. Por favor, intenta de nuevo.');
+                    });
+                }
+            });
+
+            document.getElementById('reservationModal').addEventListener('click', (e) => {
+                if (e.target.id === 'reservationModal') closeModal();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeCart();
+                    closeModal();
+                }
+            });
+        </script>
 </body>
 </html>

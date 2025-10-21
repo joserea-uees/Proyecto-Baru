@@ -31,3 +31,5 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/user/delete', [ProfileController::class, 'deleteAccount'])->name('user.delete');
 });
 
+Route::post('/pedidos', [App\Http\Controllers\PedidoController::class, 'store'])->name('pedidos.store');
+

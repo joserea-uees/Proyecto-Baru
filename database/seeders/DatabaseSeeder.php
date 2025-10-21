@@ -15,5 +15,10 @@ class DatabaseSeeder extends Seeder
             'email' => null,
             'password' => \Illuminate\Support\Facades\Hash::make('123456789'),
         ]);
+    
+        $this->call([
+            CategoriaSeeder::class,
+            ProductoSeeder::class,
+        ]);
     }
 }

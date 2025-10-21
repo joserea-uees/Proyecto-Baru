@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>BARÚ Food Lounge - Reservas</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #001F3F 0%, #003366 100%);
+            min-height: 100vh;
+        }
+        .hero-gradient {
+            background: linear-gradient(rgba(0,31,63,0.6), rgba(0,51,102,0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        .reservation-card { 
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            position: relative;
+            overflow: hidden;
+        }
+        .reservation-card:hover { 
+            transform: translateY(-4px) scale(1.01); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .search-input {
+            background: rgba(255,255,255,0.95);
+            border: 1px solid #D1D5DB;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            border-color: #001F3F;
+            box-shadow: 0 0 0 3px rgba(0,31,63,0.1);
+            background: white;
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sidebar-icon {
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .sidebar-icon:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-pending {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        .status-confirmed {
+            background: #D1FAE5;
+            color: #059669;
+        }
+        .status-cancelled {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700">
+    <section class="hero-gradient h-56 flex items-center justify-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+        <div class="text-center text-white z-10">
+            <h1 class="text-5xl md:text-6xl font-bold font-serif mb-2 animate-fade-in-up">BARÚ Food Lounge</h1>
+            <p class="text-xl opacity-90">Tus reservas, organizadas y listas</p>
+        </div>
+        <style>
+            @keyframes fade-in-up {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fade-in-up { animation: fade-in-up 1s ease-out; }
+        </style>
+    </section>
+
+    <div class="flex h-screen -mt-32 relative">
+        <aside class="w-16 bg-white/90 backdrop-blur-md shadow-lg flex flex-col items-center pt-24 pb-6 z-10">
+            <div class="mb-8"></div>
+            <nav class="flex flex-col space-y-6">
+                <a href="{{ route('home') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-home text-xl"></i></a>
+                <a href="{{ route('menu') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-utensils text-xl"></i></a>
+                <a href="{{ route('reservas') }}" class="sidebar-icon text-navy-700 hover:text-navy-900 bg-navy-100"><i class="fas fa-calendar-check text-xl"></i></a>
+                <a href="{{ route('password.change') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-cog text-xl"></i></a>
+            </nav>
+        </aside>
+
+        <div class="flex-1 flex flex-col bg-white/80 backdrop-blur-sm">
+            <header class="bg-transparent p-4 flex justify-between items-center sticky top-0 z-20">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-calendar-check text-2xl text-white sidebar-icon"></i>
+                    <h1 class="text-xl font-semibold text-white font-serif">Mis Reservas</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-white text-white/90 font-medium hidden md:block">¡Hola, {{ auth()->user()->name }}!</span>
+                    <form action="{{ route('logout') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fas fa-sign-out-alt text-white"></i>
+                        </button>
+                    </form>
+                </div>
+            </header>
+
+            <main class="flex-1 p-6 overflow-auto fade-in">
+                <div class="mb-6">
+                    <div class="relative mb-4">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-400"></i>
+                        <input type="text" id="searchInput" placeholder="Busca por código de reserva..." class="search-input w-full pl-10 p-3 rounded-lg focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="reservationsGrid">
+                    @foreach ($reservas as $reserva)
+                        <div class="reservation-card bg-white rounded-lg shadow-sm overflow-hidden" data-reservation-code="{{ $reserva->reservation_code }}">
+                            <div class="p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h5 class="text-lg font-medium text-navy-900">Reserva #{{ $reserva->reservation_code }}</h5>
+                                    <span class="status-badge status-{{ $reserva->estado }}">{{ ucfirst($reserva->estado) }}</span>
+                                </div>
+                                <p class="text-sm text-navy-500 mb-2">Fecha de entrega: {{ \Carbon\Carbon::parse($reserva->fecha_reserva)->format('d/m/Y') }}</p>
+                                <p class="text-sm text-navy-600 mb-2">Productos:</p>
+                                <ul class="text-sm text-navy-600 mb-3">
+                                    @foreach ($reserva->productos as $producto)
+                                        <li>{{ $producto->nombre }} (x{{ $producto->pivot->cantidad }}) - ${{ number_format($producto->pivot->cantidad * $producto->precio, 2) }}</li>
+                                    @endforeach
+                                </ul>
+                                @if($reserva->comentarios)
+                                    <p class="text-sm text-navy-600 mb-3"><strong>Comentarios:</strong> {{ $reserva->comentarios }}</p>
+                                @endif
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xl font-semibold text-navy-900">${{ number_format($reserva->total, 2) }}</span>
+                                    @if($reserva->estado === 'pending')
+                                        <button class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" onclick="cancelReservation('{{ $reserva->reservation_code }}')">
+                                            <i class="fas fa-trash text-sm"></i> Cancelar
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        console.log("Script de reservas cargado ✅");
+
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = e.target.value.toLowerCase();
+                document.querySelectorAll('.reservation-card').forEach(card => {
+                    const code = card.dataset.reservationCode.toLowerCase();
+                    const shouldShow = code.includes(query);
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.style.display = shouldShow ? 'block' : 'none';
+                        if (shouldShow) {
+                            card.style.opacity = '1';
+                        }
+                    }, 200);
+                });
+            }, 300);
+        });
+
+        function cancelReservation(reservationCode) {
+            if (confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
+                fetch('{{ route('reservas.cancel') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ reservation_code: reservationCode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const card = document.querySelector(`.reservation-card[data-reservation-code="${reservationCode}"]`);
+                        if (card) {
+                            const statusBadge = card.querySelector('.status-badge');
+                            statusBadge.classList.remove('status-pending');
+                            statusBadge.classList.add('status-cancelled');
+                            statusBadge.textContent = 'Cancelado';
+                            card.querySelector('button').remove();
+                        }
+                        alert('Reserva cancelada exitosamente.');
+                    } else {
+                        alert('Error al cancelar la reserva: ' + (data.message || 'Inténtalo de nuevo.'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al procesar la cancelación. Por favor, intenta de nuevo.');
+                });
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('searchInput').value = '';
+                document.querySelectorAll('.reservation-card').forEach(card => {
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.style.display = 'block';
+                        card.style.opacity = '1';
+                    }, 200);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

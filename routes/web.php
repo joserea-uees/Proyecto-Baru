@@ -20,6 +20,18 @@ Route::get('/home', function () {
     return view('home', compact('categorias'));
 })->name('home')->middleware('auth');
 
+Route::get('/menu', function () {
+    $categorias = \App\Models\Categoria::with('productos')->get();
+    return view('menu', compact('categorias'));
+})->name('menu')->middleware('auth');
+
+Route::get('/reservas', function () {
+    $reservas = \App\Models\Pedido::with('productos')->where('user_id', auth()->id())->get();
+    return view('reservas', compact('reservas'));
+})->name('reservas')->middleware('auth');
+
+Route::post('/reservas/cancel', [PedidoController::class, 'cancel'])->name('reservas.cancel')->middleware('auth');
+
 Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store')->middleware('auth');
 Route::get('/pedidos/{pedido}/ticket', [PedidoController::class, 'ticket'])->name('pedidos.ticket')->middleware('auth');
 
@@ -38,4 +50,4 @@ Route::get('/admin/dashboard', function () {
 })->name('admin.dashboard')->middleware('auth');
 
 Route::get('/admin/login', function () { return view('adminLogin'); })->name('admin.login');
-Route::post('/admin/login', [AuthController::class, 'adminLogin'])->name('admin.login.submit'); 
+Route::post('/admin/login', [AuthController::class, 'adminLogin'])->name('admin.login.submit');

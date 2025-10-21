@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'José Rea',
             'codigo_estudiante' => '2023240089',
             'email' => null,
+            'rol' => 'admin',
             'password' => \Illuminate\Support\Facades\Hash::make('123456789'),
         ]);
     

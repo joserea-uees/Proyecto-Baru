@@ -11,7 +11,8 @@ class ModifyUsersTable extends Migration
         Schema::table('users', function (Blueprint $table) {
             //$table->dropColumn('email'); // Elimina columna existente si aplica
             $table->dropColumn('email_verified_at');
-            $table->string('codigo_estudiante')->unique()->after('name'); // Agrega nueva columna
+            $table->string('codigo_estudiante')->unique()->after('name');
+            $table->string('rol')->default('user')->after('codigo_estudiante');
         });
     }
 

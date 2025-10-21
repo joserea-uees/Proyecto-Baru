@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class User extends Authenticatable
 {
-    use HasFactory; // Add this trait
+    use HasFactory;
 
     protected $fillable = [
         'name',
         'codigo_estudiante',
         'password',
+        'rol',
     ];
 
     protected $hidden = [
@@ -28,5 +29,10 @@ class User extends Authenticatable
     public function getAuthIdentifierName()
     {
         return 'codigo_estudiante';
+    }
+
+    public function isAdmin()
+    {
+        return $this->rol === 'admin';
     }
 }

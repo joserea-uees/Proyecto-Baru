@@ -77,6 +77,42 @@
             background: #FEE2E2;
             color: #DC2626;
         }
+        .modal-container {
+            animation: modalFadeIn 0.3s ease-out;
+            backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            background: linear-gradient(145deg, #ffffff, #f9fafb);
+            box-shadow: 0 8px 24px rgba(0, 31, 63, 0.2);
+            border-radius: 16px;
+            transform: scale(0.95);
+            animation: modalContentPop 0.3s ease-out forwards;
+        }
+        .modal-button {
+            transition: all 0.2s ease;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .modal-button:hover {
+            transform: translateY(-1px);
+        }
+        .modal-button-cancel:hover {
+            background: #f3f4f6;
+        }
+        .modal-button-confirm {
+            background: linear-gradient(to right, #DC2626, #B91C1C);
+        }
+        .modal-button-confirm:hover {
+            background: linear-gradient(to right, #B91C1C, #991B1B);
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes modalContentPop {
+            to { transform: scale(1); }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700">
@@ -168,13 +204,16 @@
         </div>
     </div>
 
-    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h3 class="text-lg font-semibold text-navy-900 mb-4">Confirmar Cancelación</h3>
-            <p class="text-navy-500 mb-6">¿Estás seguro de que deseas cancelar la reserva #<span id="modalReservationCode"></span>?</p>
-            <div class="flex justify-end space-x-3">
-                <button id="cancelModalCancel" class="px-4 py-2 text-navy-600 hover:bg-navy-50 rounded">No</button>
-                <button id="confirmModalConfirm" class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded" data-reservation-code="">Sí, Cancelar</button>
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden modal-container">
+        <div class="modal-content p-8 max-w-md w-full">
+            <div class="flex items-center justify-center mb-4">
+                <i class="fas fa-exclamation-circle text-3xl text-red-500 mr-2"></i>
+                <h3 class="text-2xl font-bold text-navy-900 font-serif">Confirmar Cancelación</h3>
+            </div>
+            <p class="text-navy-600 mb-6 text-center text-base leading-relaxed">¿Estás seguro de que deseas cancelar la reserva #<span id="modalReservationCode" class="font-semibold"></span>?</p>
+            <div class="flex justify-center space-x-4">
+                <button id="cancelModalCancel" class="modal-button modal-button-cancel px-6 py-2.5 text-navy-600 bg-gray-100 hover:bg-gray-200">No, volver</button>
+                <button id="confirmModalConfirm" class="modal-button modal-button-confirm px-6 py-2.5 text-white" data-reservation-code="">Sí, cancelar</button>
             </div>
         </div>
     </div>

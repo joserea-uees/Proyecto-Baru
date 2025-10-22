@@ -142,11 +142,11 @@
                                     <span class="text-xl font-semibold text-navy-900">Total: ${{ number_format($reserva->total, 2) }}</span>
                                     <div class="flex space-x-2">
                                         @if($reserva->estado === 'pendiente')
-                                            <form action="{{ route('reservas.cancel') }}" method="POST" class="inline cancel-form" data-reservation-code="{{ $reserva->reservation_code }}">
+                                            <form action="{{ route('pedidos.cancel') }}" method="POST" class="inline cancel-form" data-reservation-code="{{ $reserva->reservation_code }}">
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="reservation_code" value="{{ $reserva->reservation_code }}">
-                                                <button type="submit" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50">
+                                                <button type="submit" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors">
                                                     <i class="fas fa-trash text-sm"></i> Cancelar
                                                 </button>
                                             </form>
@@ -172,77 +172,67 @@
         </div>
     </div>
 
+    <!-- Modal de confirmación -->
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+            <h3 class="text-lg font-semibold text-navy-900 mb-4">Confirmar Cancelación</h3>
+            <p class="text-navy-500 mb-6">¿Estás seguro de que deseas cancelar la reserva #<span id="modalReservationCode"></span>?</p>
+            <div class="flex justify-end space-x-3">
+                <button id="cancelModalCancel" class="px-4 py-2 text-navy-600 hover:bg-navy-50 rounded">No</button>
+                <button id="confirmModalConfirm" class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Sí, Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         console.log("Script de reservas cargado ✅");
+
+        function showConfirmation(reservationCode, callback) {
+            const modal = document.getElementById('confirmationModal');
+            const modalCode = document.getElementById('modalReservationCode');
+            const cancelBtn = document.getElementById('cancelModalCancel');
+            const confirmBtn = document.getElementById('confirmModalConfirm');
+
+            modalCode.textContent = reservationCode;
+            modal.classList.remove('hidden');
+
+            const closeModal = () => modal.classList.add('hidden');
+
+            cancelBtn.addEventListener('click', () => {
+                closeModal();
+                callback(false);
+            }, { once: true });
+
+            confirmBtn.addEventListener('click', () => {
+                closeModal();
+                callback(true);
+            }, { once: true });
+        }
 
         document.querySelectorAll('.cancel-form').forEach(form => {
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
-                if (!confirm('¿Estás seguro de que deseas cancelar la reserva #' + this.dataset.reservationCode + '?')) {
-                    return;
-                }
+                const reservationCode = this.dataset.reservationCode;
 
-                const formData = new FormData(this);
-                fetch(this.action, {
-                    method: 'PATCH',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la respuesta del servidor: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert('Reserva cancelada exitosamente');
-                        location.reload();
-                    } else {
-                        alert('Error al cancelar la reserva: ' + (data.message || 'Desconocido'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al cancelar:', error);
-                    alert('Error al cancelar la reserva: ' + error.message);
-                });
-            });
-        });
+                showConfirmation(reservationCode, (confirmed) => {
+                    if (!confirmed) return;
 
-        let searchTimeout;
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                const query = e.target.value.toLowerCase();
-                document.querySelectorAll('.reservation-card').forEach(card => {
-                    const code = card.dataset.reservationCode.toLowerCase();
-                    const shouldShow = code.includes(query);
-                    card.style.opacity = '0';
-                    setTimeout(() => {
-                        card.style.display = shouldShow ? 'block' : 'none';
-                        if (shouldShow) {
-                            card.style.opacity = '1';
+                    const formData = new FormData(this);
+                    console.log('FormData:', Object.fromEntries(formData));
+
+                    fetch(this.action, {
+                        method: 'PATCH',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(data => {
+                                throw { status: response.status, data };
+                            });
                         }
-                    }, 200);
-                });
-            }, 300);
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.getElementById('searchInput').value = '';
-                document.querySelectorAll('.reservation-card').forEach(card => {
-                    card.style.opacity = '0';
-                    setTimeout(() => {
-                        card.style.display = 'block';
-                        card.style.opacity = '1';
-                    }, 200);
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+                        return response.json();
+                    })

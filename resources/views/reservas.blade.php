@@ -277,10 +277,24 @@
                         if (data.success) {
                             Swal.fire({
                                 icon: 'success',
-                                title: '¡Reserva cancelada!',
+                                title: '¡Reserva Cancelada!',
                                 text: data.message || 'La reserva ha sido cancelada exitosamente.',
-                                timer: 2000,
-                                showConfirmButton: false
+                                timer: 2500,
+                                showConfirmButton: false,
+                                customClass: {
+                                    popup: 'bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-xl',
+                                    title: 'text-2xl font-serif text-navy-900',
+                                    content: 'text-navy-600 text-base',
+                                    icon: 'text-green-500'
+                                },
+                                iconHtml: '<i class="fas fa-check-circle fa-2x"></i>',
+                                backdrop: 'rgba(0, 31, 63, 0.4) backdrop-filter: blur(4px)',
+                                showClass: {
+                                    popup: 'animate__animated animate__fadeInDown animate__faster'
+                                },
+                                hideClass: {
+                                    popup: 'animate__animated animate__fadeOutUp animate__faster'
+                                }
                             }).then(() => {
                                 window.location.href = "{{ route('reservas') }}";
                             });
@@ -288,7 +302,12 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: data.message || 'No se pudo cancelar la reserva.'
+                                text: data.message || 'No se pudo cancelar la reserva.',
+                                customClass: {
+                                    popup: 'bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-xl',
+                                    title: 'text-2xl font-serif text-navy-900',
+                                    content: 'text-navy-600 text-base'
+                                }
                             });
                         }
                     })
@@ -297,7 +316,12 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: error.data?.message || 'Ocurrió un error al cancelar la reserva.'
+                            text: error.data?.message || 'Ocurrió un error al cancelar la reserva.',
+                            customClass: {
+                                popup: 'bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-xl',
+                                title: 'text-2xl font-serif text-navy-900',
+                                content: 'text-navy-600 text-base'
+                            }
                         });
                     });
                 });

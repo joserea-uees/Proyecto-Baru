@@ -6,6 +6,7 @@ use App\Models\Pedido;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PedidoController extends Controller
 {
@@ -54,31 +55,45 @@ class PedidoController extends Controller
     public function cancel(Request $request)
     {
         $request->validate([
-            'reservation_code' => 'required|string',
+            'reservation_code' => 'required|string|exists:pedidos,reservation_code',
         ]);
 
         $user = Auth::user();
-        $userRecord = $user ? User::where('codigo_estudiante', $user->codigo_estudiante)->first() : null;
-        if (!$userRecord) {
-            return response()->json(['success' => false, 'message' => 'Usuario no encontrado'], 403);
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'No autenticado'], 401);
         }
 
-        $pedido = Pedido::where('reservation_code', $request->reservation_code)
-            ->where('user_id', $userRecord->id)
-            ->first();
+        $query = Pedido::where('reservation_code', $request->reservation_code);
+        if (!$user->isAdmin()) {
+            $query->where('user_id', $user->id);
+        }
 
-        if ($pedido && $pedido->estado === 'pendiente') {
-            $pedido->update(['estado' => 'cancelado']);
-            return response()->json([
-                'success' => true,
-                'message' => 'Reserva cancelada exitosamente',
+        $pedido = $query->first();
+
+        if (!$pedido) {
+            \Log::warning('Intento de cancelación fallido', [
+                'reservation_code' => $request->reservation_code,
+                'user_id' => $user->id,
+                'is_admin' => $user->isAdmin(),
             ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Reserva no encontrada' . ($user->isAdmin() ? '' : ' o no pertenece al usuario'),
+            ], 404);
         }
 
+        if ($pedido->estado !== 'pendiente') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solo las reservas pendientes pueden ser canceladas',
+            ], 400);
+        }
+
+        $pedido->update(['estado' => 'cancelado']);
         return response()->json([
-            'success' => false,
-            'message' => 'No se pudo cancelar la reserva. Verifica el código o el estado del pedido.',
-        ], 400);
+            'success' => true,
+            'message' => 'Reserva cancelada exitosamente',
+        ]);
     }
 
     public function ticket(Request $request, $id)

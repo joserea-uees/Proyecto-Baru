@@ -20,13 +20,11 @@ Route::get('/home', function () {
     return view('home', compact('categorias'));
 })->name('home')->middleware('auth');
 
-
 Route::get('/reservas', [PedidoController::class, 'index'])->name('reservas')->middleware('auth');
 
-Route::patch('pedidos/cancel', [App\Http\Controllers\PedidoController::class, 'cancel'])
+Route::patch('reservas', [App\Http\Controllers\PedidoController::class, 'cancel'])
     ->name('pedidos.cancel')
     ->middleware(['auth', 'throttle:10,1']);
-    
 
 Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store')->middleware('auth');
 Route::get('/pedidos/{id}/ticket', [PedidoController::class, 'ticket'])->name('pedidos.ticket')->middleware('auth');

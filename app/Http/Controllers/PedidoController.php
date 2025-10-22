@@ -19,7 +19,6 @@ class PedidoController extends Controller
             'comentarios' => 'nullable|string',
         ]);
 
-        // Calculate total based on productos
         $productos = json_decode($request->productos, true);
         $total = 0;
         foreach ($productos as $producto) {
@@ -54,16 +53,17 @@ class PedidoController extends Controller
 
     public function cancel(Request $request)
     {
-        $request->validate([
-            'reservation_code' => 'required|string|exists:pedidos,reservation_code',
-        ]);
-
         $user = Auth::user();
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'No autenticado'], 401);
         }
 
-        $query = Pedido::where('reservation_code', $request->reservation_code);
+        $reservation_code = $request->input('reservation_code');
+        if (!$reservation_code) {
+            return response()->json(['success' => false, 'message' => 'El código de reserva es requerido'], 422);
+        }
+
+        $query = Pedido::where('reservation_code', $reservation_code);
         if (!$user->isAdmin()) {
             $query->where('user_id', $user->id);
         }
@@ -72,7 +72,7 @@ class PedidoController extends Controller
 
         if (!$pedido) {
             \Log::warning('Intento de cancelación fallido', [
-                'reservation_code' => $request->reservation_code,
+                'reservation_code' => $reservation_code,
                 'user_id' => $user->id,
                 'is_admin' => $user->isAdmin(),
             ]);

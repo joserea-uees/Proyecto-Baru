@@ -188,14 +188,25 @@
         .comments-section {
             margin-bottom: 1rem;
         }
+        @media (max-width: 768px) {
+            .hero-section {
+                h-48;
+            }
+            .main-content {
+                padding-left: 0;
+            }
+            .category-buttons {
+                padding-bottom: 1rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700">
-    <section class="hero-gradient h-56 flex items-center justify-center relative overflow-hidden">
+    <section class="hero-gradient h-56 md:h-64 flex items-center justify-center relative overflow-hidden">
         <div class="absolute inset-0 bg-black bg-opacity-20"></div>
-        <div class="text-center text-white z-10">
-            <h1 class="text-5xl md:text-6xl font-bold font-serif mb-2 animate-fade-in-up">BARÚ Food Lounge</h1>
-            <p class="text-xl opacity-90">Descubre sabores inolvidables en un ambiente vibrante</p>
+        <div class="text-center text-white z-10 px-4">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold font-serif mb-2 animate-fade-in-up">BARÚ Food Lounge</h1>
+            <p class="text-lg sm:text-xl opacity-90">Descubre sabores inolvidables en un ambiente vibrante</p>
         </div>
         <style>
             @keyframes fade-in-up {
@@ -206,23 +217,23 @@
         </style>
     </section>
 
-    <div class="flex h-screen -mt-32 relative">
-        <aside class="w-16 bg-white/90 backdrop-blur-md shadow-lg flex flex-col items-center pt-24 pb-6 z-10">
+    <div class="flex h-[calc(100vh-14rem)] md:h-screen -mt-32 relative">
+        <aside class="w-16 bg-white/90 backdrop-blur-md shadow-lg flex flex-col items-center justify-content-center align-items-center pt-24 pb-6 z-10 lg:block hidden">
             <div class="mb-8"></div>
-            <nav class="flex flex-col space-y-6">
+            <nav class="flex flex-col space-y-6 justify-center items-center">
                 <a href="{{ route('home') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-home text-xl"></i></a>
                 <a href="{{ route('reservas') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-calendar-check text-xl"></i></a>
                 <a href="{{ route('password.change') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-cog text-xl"></i></a>
             </nav>
         </aside>
 
-        <div class="flex-1 flex flex-col bg-white/80 backdrop-blur-sm">
-            <header class="bg-transparent p-4 flex justify-between items-center sticky top-0 z-20">
+        <div class="flex-1 flex flex-col bg-white/80 backdrop-blur-sm w-full">
+            <header class="bg-transparent p-4 flex justify-between items-center justify-center sticky top-0 z-20">
                 <div class="flex items-center space-x-3">
                     <a class="fas fa-utensils text-2xl text-white sidebar-icon"></a>
                     <h1 class="text-xl font-semibold text-white font-serif">Menú</h1>
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center justify-center space-x-4">
                     <span class="text-white text-white/90 font-medium hidden md:block">¡Hola, {{ auth()->user()->name }}!</span>
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
@@ -237,13 +248,13 @@
                 </div>
             </header>
 
-            <main class="flex-1 p-6 overflow-auto fade-in">
+            <main class="flex-1 p-4 sm:p-6 overflow-auto fade-in">
                 <div class="mb-6">
                     <div class="relative mb-4">
                         <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-400"></i>
                         <input type="text" id="searchInput" placeholder="Busca tu plato favorito..." class="search-input w-full pl-10 p-3 rounded-lg focus:outline-none">
                     </div>
-                    <div class="flex space-x-3 mt-4 overflow-x-auto pb-2">
+                    <div class="flex space-x-3 mt-4 overflow-x-auto pb-2 category-buttons">
                         <button class="category-btn active" data-category="all"><i class="fas fa-list mr-2"></i>Todo ({{ \App\Models\Producto::count() }})</button>
                         @foreach ($categorias as $categoria)
                             <button class="category-btn" data-category="{{ $categoria->id }}"><i class="fas fa-{{ $categoria->icono ?? 'tag' }} mr-2"></i>{{ $categoria->nombre }} ({{ $categoria->productos->count() }})</button>
@@ -251,7 +262,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="productsGrid">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" id="productsGrid">
                     @foreach ($categorias as $categoria)
                         @foreach ($categoria->productos as $producto)
                             <div class="product-card bg-white rounded-lg shadow-sm overflow-hidden" data-category="{{ $categoria->id }}">
@@ -279,7 +290,7 @@
             </main>
         </div>
 
-        <aside class="cart-panel fixed right-0 top-0 h-full w-80 bg-white shadow-xl z-50" id="cartPanel">
+        <aside class="cart-panel fixed right-0 top-0 h-full w-full md:w-80 bg-white shadow-xl z-50" id="cartPanel">
             <div class="flex justify-between items-center p-4 border-b border-navy-100">
                 <h2 class="text-xl font-semibold text-navy-900">Mi Reserva</h2>
                 <button id="closeCart" class="text-navy-400 hover:text-navy-600"><i class="fas fa-times text-xl"></i></button>

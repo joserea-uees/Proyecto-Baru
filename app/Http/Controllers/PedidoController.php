@@ -12,7 +12,7 @@ class PedidoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'reservation_code' => 'required|string',
+            'reservation_code' => 'required|string|unique:pedidos,reservation_code',
             'productos' => 'required|json',
             'fecha_reserva' => 'required|date|after:today',
             'comentarios' => 'nullable|string',
@@ -28,17 +28,20 @@ class PedidoController extends Controller
             }
         }
 
-        // Obtener el user_id basado en el codigo_estudiante
-        $user = Auth::check() ? User::where('codigo_estudiante', Auth::user()->codigo_estudiante)->first() : null;
-        $userId = $user ? $user->id : null;
+        $user = Auth::user();
+        $userRecord = $user ? User::where('codigo_estudiante', $user->codigo_estudiante)->first() : null;
+        if (!$userRecord) {
+            return response()->json(['success' => false, 'message' => 'Usuario no encontrado'], 403);
+        }
 
         $pedido = Pedido::create([
-            'user_id' => $userId,
+            'user_id' => $userRecord->id,
             'reservation_code' => $request->reservation_code,
             'productos' => $request->productos,
             'fecha_reserva' => $request->fecha_reserva,
             'comentarios' => $request->comentarios,
             'total' => $total,
+            'estado' => 'pendiente',
         ]);
 
         return response()->json([
@@ -47,19 +50,25 @@ class PedidoController extends Controller
             'message' => 'Reserva creada exitosamente',
         ]);
     }
-    
+
     public function cancel(Request $request)
     {
         $request->validate([
             'reservation_code' => 'required|string',
         ]);
 
+        $user = Auth::user();
+        $userRecord = $user ? User::where('codigo_estudiante', $user->codigo_estudiante)->first() : null;
+        if (!$userRecord) {
+            return response()->json(['success' => false, 'message' => 'Usuario no encontrado'], 403);
+        }
+
         $pedido = Pedido::where('reservation_code', $request->reservation_code)
-            ->where('user_id', Auth::id())
+            ->where('user_id', $userRecord->id)
             ->first();
 
         if ($pedido && $pedido->estado === 'pendiente') {
-            $pedido->update(['estado' => 'cancelled']);
+            $pedido->update(['estado' => 'cancelado']);
             return response()->json([
                 'success' => true,
                 'message' => 'Reserva cancelada exitosamente',
@@ -68,24 +77,36 @@ class PedidoController extends Controller
 
         return response()->json([
             'success' => false,
-            'message' => 'No se pudo cancelar la reserva',
+            'message' => 'No se pudo cancelar la reserva. Verifica el código o el estado del pedido.',
         ], 400);
     }
 
     public function ticket(Request $request, $id)
     {
-        $pedido = Pedido::with(['detallePedidos.producto', 'user'])->where('user_id', Auth::id())->findOrFail($id);
+        $user = Auth::user();
+        $userRecord = $user ? User::where('codigo_estudiante', $user->codigo_estudiante)->first() : null;
+        if (!$userRecord) {
+            abort(403, 'Usuario no encontrado');
+        }
+
+        $pedido = Pedido::with('user')
+            ->where('user_id', $userRecord->id)
+            ->findOrFail($id);
         return view('ticket', compact('pedido'));
     }
-    public function index()
-{
-    $user = Auth::check() ? User::where('codigo_estudiante', Auth::user()->codigo_estudiante)->first() : null;
-    $userId = $user ? $user->id : null;
-    $reservas = Pedido::where('user_id', $userId)
-        ->where('estado', 'pendiente')
-        ->orderBy('created_at', 'desc')
-        ->get();
 
-    return view('reservas', compact('reservas'));
-}
+    public function index()
+    {
+        $user = Auth::user();
+        $userRecord = $user ? User::where('codigo_estudiante', $user->codigo_estudiante)->first() : null;
+        if (!$userRecord) {
+            return view('reservas', ['reservas' => collect()]);
+        }
+
+        $reservas = Pedido::where('user_id', $userRecord->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('reservas', compact('reservas'));
+    }
 }

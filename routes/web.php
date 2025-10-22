@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('login');
@@ -19,26 +20,13 @@ Route::get('/home', function () {
     return view('home', compact('categorias'));
 })->name('home')->middleware('auth');
 
-Route::get('/menu', function () {
-    $categorias = \App\Models\Categoria::with('productos')->get();
-    return view('menu', compact('categorias'));
-})->name('menu')->middleware('auth');
-
-Route::get('/reservas', function () {
-    $reservas = \App\Models\Pedido::with('detallePedidos.producto')->where('user_id', auth()->id())->get();
-    return view('reservas', compact('reservas'));
-})->name('reservas')->middleware('auth');
-
-
 
 Route::get('/reservas', [PedidoController::class, 'index'])->name('reservas')->middleware('auth');
 
-
-Route::post('/reservas/cancel', [PedidoController::class, 'cancel'])->name('reservas.cancel')->middleware('auth');
+Route::patch('/reservas/cancel', [PedidoController::class, 'cancel'])->name('reservas.cancel');
 
 Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store')->middleware('auth');
 Route::get('/pedidos/{id}/ticket', [PedidoController::class, 'ticket'])->name('pedidos.ticket')->middleware('auth');
-
 
 Route::put('/password/update', [App\Http\Controllers\Auth\PasswordController::class, 'update'])->middleware('auth')->name('password.update');
 Route::get('/password/change', function () {

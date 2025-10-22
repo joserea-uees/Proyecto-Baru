@@ -64,15 +64,15 @@
             font-size: 0.75rem;
             font-weight: 500;
         }
-        .status-pending {
+        .status-pendiente {
             background: #FEF3C7;
             color: #D97706;
         }
-        .status-confirmed {
+        .status-confirmado {
             background: #D1FAE5;
             color: #059669;
         }
-        .status-cancelled {
+        .status-cancelado {
             background: #FEE2E2;
             color: #DC2626;
         }
@@ -99,7 +99,6 @@
             <div class="mb-8"></div>
             <nav class="flex flex-col space-y-6">
                 <a href="{{ route('home') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-home text-xl"></i></a>
-                <a href="{{ route('menu') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-utensils text-xl"></i></a>
                 <a href="{{ route('reservas') }}" class="sidebar-icon text-navy-700 hover:text-navy-900 bg-navy-100"><i class="fas fa-calendar-check text-xl"></i></a>
                 <a href="{{ route('password.change') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-cog text-xl"></i></a>
             </nav>
@@ -131,58 +130,87 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="reservationsGrid">
-    @forelse ($reservas as $reserva)
-        <div class="reservation-card bg-white rounded-lg shadow-sm overflow-hidden" data-reservation-code="{{ $reserva->reservation_code }}">
-            <div class="p-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h5 class="text-lg font-medium text-navy-900">Reserva #{{ $reserva->reservation_code }}</h5>
-                    <span class="status-badge status-{{ $reserva->estado }}">{{ ucfirst($reserva->estado) }}</span>
+                    @forelse ($reservas as $reserva)
+                        <div class="reservation-card bg-white rounded-lg shadow-sm overflow-hidden" data-reservation-code="{{ $reserva->reservation_code }}">
+                            <div class="p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h5 class="text-lg font-medium text-navy-900">Reserva #{{ $reserva->reservation_code }}</h5>
+                                    <span class="status-badge status-{{ $reserva->estado }}">{{ ucfirst($reserva->estado) }}</span>
+                                </div>
+                                <p class="text-sm text-navy-500 mb-2">Fecha de entrega: {{ \Carbon\Carbon::parse($reserva->fecha_reserva)->format('d/m/Y') }}</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xl font-semibold text-navy-900">Total: ${{ number_format($reserva->total, 2) }}</span>
+                                    <div class="flex space-x-2">
+                                        @if($reserva->estado === 'pendiente')
+                                            <form action="{{ route('reservas.cancel') }}" method="POST" class="inline cancel-form" data-reservation-code="{{ $reserva->reservation_code }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="reservation_code" value="{{ $reserva->reservation_code }}">
+                                                <button type="submit" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50">
+                                                    <i class="fas fa-trash text-sm"></i> Cancelar
+                                                </button>
+                                            </form>
+                                        @endif
+                                        <a href="{{ route('pedidos.ticket', $reserva->id) }}" class="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50">
+                                            <i class="fas fa-ticket-alt text-sm"></i> Ver Detalles
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center text-navy-500 py-12">
+                            <i class="fas fa-calendar-times fa-3x mb-4 text-navy-200"></i>
+                            <p class="text-base mb-2">No tienes reservas registradas</p>
+                            <a href="{{ route('home') }}" class="inline-flex items-center px-4 py-2 text-navy-600 hover:text-navy-800 font-medium">
+                                <i class="fas fa-arrow-left mr-2"></i>Volver al Menú
+                            </a>
+                        </div>
+                    @endforelse
                 </div>
-                <p class="text-sm text-navy-500 mb-2">Fecha de entrega: {{ \Carbon\Carbon::parse($reserva->fecha_reserva)->format('d/m/Y') }}</p>
-                <p class="text-sm text-navy-600 mb-2">Productos:</p>
-                <ul class="text-sm text-navy-600 mb-3">
-                    @foreach ($reserva->productos as $producto)
-                        <li>{{ $producto['cantidad'] }} x {{ $producto['id'] }} - ${{ number_format($producto['cantidad'] * $reserva->total, 2) }}</li>
-                    @endforeach
-                </ul>
-                @if($reserva->comentarios)
-                    <p class="text-sm text-navy-600 mb-3"><strong>Comentarios:</strong> {{ $reserva->comentarios }}</p>
-                @endif
-                <div class="flex justify-between items-center">
-                    <span class="text-xl font-semibold text-navy-900">${{ number_format($reserva->total, 2) }}</span>
-                    <div class="flex space-x-2">
-                        @if($reserva->estado === 'pendiente')
-                            <form action="{{ route('reservas.cancel') }}" method="POST" class="inline">
-                                @csrf
-                                <input type="hidden" name="reservation_code" value="{{ $reserva->reservation_code }}">
-                                <button type="submit" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50">
-                                    <i class="fas fa-trash text-sm"></i> Cancelar
-                                </button>
-                            </form>
-                        @endif
-                        <a href="{{ route('pedidos.ticket', $reserva->id) }}" class="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50">
-                            <i class="fas fa-ticket-alt text-sm"></i> Ver Ticket
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @empty
-        <div class="text-center text-navy-500 py-12">
-            <i class="fas fa-calendar-times fa-3x mb-4 text-navy-200"></i>
-            <p class="text-base mb-2">No tienes reservas registradas</p>
-            <a href="{{ route('home') }}" class="inline-flex items-center px-4 py-2 text-navy-600 hover:text-navy-800 font-medium">
-                <i class="fas fa-arrow-left mr-2"></i>Volver al Menú
-            </a>
-        </div>
-    @endforelse
-</div>
             </main>
         </div>
     </div>
 
     <script>
         console.log("Script de reservas cargado ✅");
+
+        document.querySelectorAll('.cancel-form').forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (!confirm('¿Estás seguro de que deseas cancelar la reserva #' + this.dataset.reservationCode + '?')) {
+                    return;
+                }
+
+                const formData = new FormData(this);
+                fetch(this.action, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Reserva cancelada exitosamente');
+                        location.reload();
+                    } else {
+                        alert('Error al cancelar la reserva: ' + (data.message || 'Desconocido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cancelar:', error);
+                    alert('Error al cancelar la reserva: ' + error.message);
+                });
+            });
+        });
 
         let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', (e) => {

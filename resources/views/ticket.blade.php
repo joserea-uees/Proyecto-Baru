@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <style>
-    
         body { 
             font-family: 'Inter', sans-serif; 
             background: linear-gradient(135deg, #001F3F 0%, #003366 100%);
@@ -64,12 +63,26 @@
         <div class="mb-4">
             <h6 class="text-sm font-medium text-navy-900 mb-2">Productos:</h6>
             <ul class="text-sm text-navy-600">
-                @foreach ($pedido->detallePedidos as $detalle)
-                    <li class="flex justify-between mb-1">
-                        <span>{{ $detalle->producto->nombre }} (x{{ $detalle->cantidad }})</span>
-                        <span>${{ number_format($detalle->cantidad * $detalle->producto->precio, 2) }}</span>
-                    </li>
-                @endforeach
+                @php
+                    $productos = is_string($pedido->productos) ? json_decode($pedido->productos, true) : $pedido->productos;
+                    $totalCantidad = $productos ? array_sum(array_column($productos, 'cantidad')) : 0;
+                    $precioPorUnidadFallback = $totalCantidad > 0 ? $pedido->total / $totalCantidad : 0;
+                @endphp
+                @if($productos)
+                    @foreach ($productos as $producto)
+                        @php
+                            $productoModel = \App\Models\Producto::find($producto['id']);
+                            $precioUnitario = $productoModel ? $productoModel->precio : (isset($producto['precio']) ? $producto['precio'] : $precioPorUnidadFallback);
+                            $subtotal = $producto['cantidad'] * $precioUnitario;
+                        @endphp
+                        <li class="flex justify-between mb-1">
+                            <span>{{ $productoModel ? $productoModel->nombre : 'Producto #' . ($producto['id'] ?? 'Desconocido') }} (x{{ $producto['cantidad'] }})</span>
+                            <span>${{ number_format($subtotal, 2) }}</span>
+                        </li>
+                    @endforeach
+                @else
+                    <li class="text-navy-500">No se encontraron productos.</li>
+                @endif
             </ul>
         </div>
         <div class="border-t border-navy-100 pt-4">
@@ -78,7 +91,6 @@
                 <span>${{ number_format($pedido->total, 2) }}</span>
             </div>
         </div>
-        <h1>hola</h1>
         <div class="mt-6 text-center">
             <a href="{{ route('reservas') }}" class="inline-flex items-center px-4 py-2 text-navy-600 hover:text-navy-800 font-medium">
                 <i class="fas fa-arrow-left mr-2"></i>Volver a Reservas

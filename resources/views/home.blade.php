@@ -211,8 +211,6 @@
             <div class="mb-8"></div>
             <nav class="flex flex-col space-y-6">
                 <a href="{{ route('home') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-home text-xl"></i></a>
-                <a href="{{ route('menu') }}" class="sidebar-icon text-navy-700 hover:text-navy-900 bg-navy-100"><i class="fas fa-utensils text-xl"></i></a>
-
                 <a href="{{ route('reservas') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-calendar-check text-xl"></i></a>
                 <a href="{{ route('password.change') }}" class="sidebar-icon text-navy-700 hover:text-navy-900"><i class="fas fa-cog text-xl"></i></a>
             </nav>

@@ -9,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
@@ -142,14 +143,9 @@
                                     <span class="text-xl font-semibold text-navy-900">Total: ${{ number_format($reserva->total, 2) }}</span>
                                     <div class="flex space-x-2">
                                         @if($reserva->estado === 'pendiente')
-                                            <form action="{{ route('pedidos.cancel') }}" method="POST" class="inline cancel-form" data-reservation-code="{{ $reserva->reservation_code }}">
-                                                @csrf
-                                                @method('PATCH')
-                                                <input type="hidden" name="reservation_code" value="{{ $reserva->reservation_code }}">
-                                                <button type="submit" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors">
-                                                    <i class="fas fa-trash text-sm"></i> Cancelar
-                                                </button>
-                                            </form>
+                                            <button class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors cancel-button" data-reservation-code="{{ $reserva->reservation_code }}">
+                                                <i class="fas fa-trash text-sm"></i> Cancelar
+                                            </button>
                                         @endif
                                         <a href="{{ route('pedidos.ticket', $reserva->id) }}" class="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50">
                                             <i class="fas fa-ticket-alt text-sm"></i> Ver Detalles
@@ -172,14 +168,13 @@
         </div>
     </div>
 
-    <!-- Modal de confirmación -->
     <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-lg p-6 max-w-sm w-full">
             <h3 class="text-lg font-semibold text-navy-900 mb-4">Confirmar Cancelación</h3>
             <p class="text-navy-500 mb-6">¿Estás seguro de que deseas cancelar la reserva #<span id="modalReservationCode"></span>?</p>
             <div class="flex justify-end space-x-3">
                 <button id="cancelModalCancel" class="px-4 py-2 text-navy-600 hover:bg-navy-50 rounded">No</button>
-                <button id="confirmModalConfirm" class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Sí, Cancelar</button>
+                <button id="confirmModalConfirm" class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded" data-reservation-code="">Sí, Cancelar</button>
             </div>
         </div>
     </div>
@@ -194,6 +189,7 @@
             const confirmBtn = document.getElementById('confirmModalConfirm');
 
             modalCode.textContent = reservationCode;
+            confirmBtn.setAttribute('data-reservation-code', reservationCode);
             modal.classList.remove('hidden');
 
             const closeModal = () => modal.classList.add('hidden');
@@ -209,21 +205,23 @@
             }, { once: true });
         }
 
-        document.querySelectorAll('.cancel-form').forEach(form => {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
+        document.querySelectorAll('.cancel-button').forEach(button => {
+            button.addEventListener('click', function () {
                 const reservationCode = this.dataset.reservationCode;
 
                 showConfirmation(reservationCode, (confirmed) => {
                     if (!confirmed) return;
 
-                    const formData = new FormData(this);
+                    const formData = new FormData();
+                    formData.append('reservation_code', reservationCode);
+                    formData.append('_method', 'PATCH');
+                    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+
                     console.log('FormData:', Object.fromEntries(formData));
 
-                    fetch(this.action, {
-                        method: 'PATCH',
+                    fetch("{{ route('pedidos.cancel') }}", {
+                        method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                             'Accept': 'application/json'
                         },
                         body: formData
@@ -236,3 +234,43 @@
                         }
                         return response.json();
                     })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Reserva cancelada!',
+                                text: data.message || 'La reserva ha sido cancelada exitosamente.',
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.href = "{{ route('reservas') }}";
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || 'No se pudo cancelar la reserva.'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.data?.message || 'Ocurrió un error al cancelar la reserva.'
+                        });
+                    });
+                });
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase();
+            const cards = document.querySelectorAll('.reservation-card');
+            cards.forEach(card => {
+                const code = card.dataset.reservationCode.toLowerCase();
+                card.style.display = code.includes(searchValue) ? '' : 'none';
+            });
+        });
+    </script>

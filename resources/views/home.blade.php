@@ -267,7 +267,14 @@
                         @foreach ($categoria->productos as $producto)
                             <div class="product-card bg-white rounded-lg shadow-sm overflow-hidden" data-category="{{ $categoria->id }}">
                                 <div class="relative">
-                                    <img src="{{ $producto->imagen ? asset($producto->imagen) : asset('img/placeholder.jpg') }}" alt="{{ $producto->nombre }}" class="w-full h-40 object-cover">
+                                        @php
+                                            $imagenRuta = $producto->imagen
+                                                ? asset($producto->imagen)
+                                                : asset('img/placeholder.jpg');
+                                        @endphp
+
+                                        <img src="{{ $imagenRuta }}" alt="{{ $producto->nombre }}" class="w-full h-40 object-cover">
+
                                     @if($producto->especial)
                                         <div class="absolute top-2 right-2 bg-navy-600 text-white px-2 py-1 rounded-md text-xs font-medium">Especial</div>
                                     @endif

@@ -18,13 +18,19 @@
       <h2 class="text-lg mt-2" style="font-family: 'Playfair Display', serif;">Admin BARÚ</h2>
     </div>
     <nav class="flex-1 p-4 space-y-3">
-      <button @click="section = 'dashboard'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900 font-semibold">🏠 Dashboard</button>
-      <button @click="section = 'pedidos'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">📦 Pedidos</button>
-      <button @click="section = 'productos'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">🍽 Productos</button>
-      <button @click="section = 'clientes'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">👥 Clientes</button>
-      <button @click="section = 'configuracion'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">⚙ Configuración</button>
-      <button @click="alert('Sesión cerrada')" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white text-gray-900 font-semibold mt-4">🚪 Cerrar Sesión</button>
-    </nav>
+  <button @click="section = 'dashboard'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900 font-semibold">🏠 Dashboard</button>
+  <button @click="section = 'pedidos'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">📦 Pedidos</button>
+  <button @click="section = 'productos'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">🍽 Productos</button>
+  <button @click="section = 'clientes'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">👥 Clientes</button>
+  <button @click="section = 'configuracion'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">⚙ Configuración</button>
+
+  <form method="POST" action="{{ route('logout') }}">
+    @csrf
+    <button type="submit" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white text-gray-900 font-semibold mt-4">
+      🚪 Cerrar Sesión
+    </button>
+  </form>
+</nav>
   </aside>
 
   <!-- Contenido principal -->
@@ -137,27 +143,170 @@
     </section>
 
     <!-- Secciones vacías -->
-    <section x-show="section === 'productos'" class="mt-10" x-transition>
-      <div class="bg-white p-6 rounded-xl shadow-md">
-        <h2 class="text-xl font-semibold text-gray-900">🍽 Gestión de Productos</h2>
-        <p class="text-gray-600 mt-2">Aquí podrás añadir, editar o eliminar productos del menú.</p>
-      </div>
-    </section>
-
-    <section x-show="section === 'clientes'" class="mt-10" x-transition>
-      <div class="bg-white p-6 rounded-xl shadow-md">
-        <h2 class="text-xl font-semibold text-gray-900">👥 Gestión de Clientes</h2>
-        <p class="text-gray-600 mt-2">Listado y detalles de tus clientes frecuentes.</p>
-      </div>
-    </section>
-
-    <section x-show="section === 'configuracion'" class="mt-10" x-transition>
-      <div class="bg-white p-6 rounded-xl shadow-md">
-        <h2 class="text-xl font-semibold text-gray-900">⚙ Configuración</h2>
-        <p class="text-gray-600 mt-2">Preferencias del sistema y ajustes generales.</p>
-      </div>
-    </section>
+ <section x-show="section === 'productos'" class="mt-10 space-y-6" x-transition>
+  <!-- Encabezado -->
+  <div class="bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-xl font-semibold text-gray-900">🍽 Gestión de Productos</h2>
+    <p class="text-gray-600 mt-2">Aquí podrás añadir, editar o eliminar productos del menú.</p>
   </div>
+
+  <!-- Tabla de productos -->
+  <div class="bg-white p-6 rounded-xl shadow-md">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">📋 Platos del Menú</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-100 text-gray-700 uppercase text-sm">
+            <th class="py-3 px-4">Nombre</th>
+            <th class="py-3 px-4">Descripción</th>
+            <th class="py-3 px-4">Precio</th>
+            <th class="py-3 px-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach($productos as $producto)
+          <tr class="border-b hover:bg-gray-50">
+            <td class="py-3 px-4">{{ $producto->nombre }}</td>
+            <td class="py-3 px-4">{{ $producto->descripcion }}</td>
+            <td class="py-3 px-4">${{ number_format($producto->precio, 2) }}</td>
+            <td class="py-3 px-4 space-x-2">
+                <a href="{{ route('productos.edit', $producto->id) }}" class="text-blue-600 text-sm">✏️ Editar</a>
+                <form action="{{ route('productos.destroy', $producto->id) }}" method="POST" class="inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="text-red-600 text-sm">🗑 Eliminar</button>
+                </form>
+            </td>
+          </tr>
+          @endforeach
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Botón para añadir producto (visual) -->
+  <div class="text-right">
+    <a href="{{ route('productos.create') }}" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-medium">
+  ➕ Añadir nuevo producto
+</a>
+  </div>
+</section>
+
+
+
+    <section x-show="section === 'clientes'" class="mt-10 space-y-6" x-transition>
+  <!-- Encabezado -->
+  <div class="bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-xl font-semibold text-gray-900">👥 Gestión de Clientes</h2>
+    <p class="text-gray-600 mt-2">Listado y detalles de tus clientes frecuentes.</p>
+  </div>
+
+ <!-- Tabla de clientes -->
+<div class="bg-white p-6 rounded-xl shadow-md">
+  <h3 class="text-lg font-semibold text-gray-800 mb-4">📋 Lista de Clientes</h3>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-gray-100 text-gray-700 uppercase text-sm">
+          <th class="py-3 px-4">Código de Estudiante</th>
+          <th class="py-3 px-4">Nombre</th>
+          <th class="py-3 px-4">Registrado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b hover:bg-gray-50">
+          <td class="py-3 px-4">2025235543</td>
+          <td class="py-3 px-4">Carlos Ruiz</td>
+          <td class="py-3 px-4">15/08/2025</td>
+        </tr>
+        <tr class="border-b hover:bg-gray-50">
+          <td class="py-3 px-4">2025231127</td>
+          <td class="py-3 px-4">María López</td>
+          <td class="py-3 px-4">20/09/2025</td>
+        </tr>
+        <tr class="border-b hover:bg-gray-50">
+          <td class="py-3 px-4">2025239981</td>
+          <td class="py-3 px-4">Luis Torres</td>
+          <td class="py-3 px-4">01/10/2025</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+
+<section x-show="section === 'configuracion'" class="mt-10 space-y-6" x-transition>
+  <!-- Panel principal -->
+  <div class="bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-xl font-semibold text-gray-900">⚙ Configuración</h2>
+    <p class="text-gray-600 mt-2">Preferencias del sistema y ajustes generales.</p>
+  </div>
+
+  <!-- Opciones administrativas -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Usuarios -->
+    <div class="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">👥 Gestión de Usuarios</h3>
+      <ul class="list-disc list-inside text-gray-600 text-sm space-y-1">
+        <li>Crear, editar o eliminar usuarios</li>
+        <li>Asignar roles y permisos (admin, editor, usuario, invitado)</li>
+        <li>Bloquear / desbloquear cuentas</li>
+        <li>Restablecer contraseñas</li>
+      </ul>
+    </div>
+
+    <!-- Seguridad -->
+    <div class="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">🔐 Seguridad y Actividad</h3>
+      <ul class="list-disc list-inside text-gray-600 text-sm space-y-1">
+        <li>Ver historial de inicio de sesión</li>
+        <li>Monitorear actividad de usuarios</li>
+        <li>Alertas de acceso sospechoso</li>
+      </ul>
+    </div>
+
+    <!-- Marca -->
+    <div class="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">🎨 Personalización</h3>
+      <ul class="list-disc list-inside text-gray-600 text-sm space-y-1">
+        <li>Nombre de la aplicación</li>
+        <li>Logotipo y colores de marca</li>
+        <li>Estilo visual del panel</li>
+      </ul>
+    </div>
+
+    <!-- Sistema -->
+    <div class="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">🔧 Sistema y Plugins</h3>
+      <ul class="list-disc list-inside text-gray-600 text-sm space-y-1">
+        <li>Actualizaciones del sistema</li>
+        <li>Gestión de plugins o extensiones</li>
+        <li>Compatibilidad y versiones</li>
+      </ul>
+    </div>
+
+    <!-- Rendimiento -->
+    <div class="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">🧹 Mantenimiento</h3>
+      <ul class="list-disc list-inside text-gray-600 text-sm space-y-1">
+        <li>Limpieza de caché</li>
+        <li>Archivos temporales</li>
+        <li>Optimización de base de datos</li>
+      </ul>
+    </div>
+
+    <!-- Recursos -->
+    <div class="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">📊 Estado del Servidor</h3>
+      <ul class="list-disc list-inside text-gray-600 text-sm space-y-1">
+        <li>Uso de CPU y memoria</li>
+        <li>Espacio en disco</li>
+        <li>Estado de servicios activos</li>
+      </ul>
+    </div>
+  </div>
+</section>
 
   <!-- Chart.js scripts -->
   <script>

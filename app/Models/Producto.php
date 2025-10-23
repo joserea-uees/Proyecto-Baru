@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Producto extends Model
 {
@@ -15,12 +17,12 @@ class Producto extends Model
         'disponible',
     ];
 
-    public function categoria()
+    public function categoria(): BelongsTo
     {
         return $this->belongsTo(Categoria::class);
     }
 
-    public function detallesPedidos()
+    public function detallesPedidos(): HasMany
     {
         return $this->hasMany(DetallePedido::class);
     }

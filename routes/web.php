@@ -3,7 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductoController;
 
 Route::get('/', function () {
     return view('login');
@@ -39,9 +41,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/user/delete', [ProfileController::class, 'deleteAccount'])->name('user.delete');
 });
 
-Route::get('/admin/dashboard', function () {
-    return view('admin');
-})->name('admin.dashboard')->middleware('auth');
-
+Route::get('/admin/dashboard', [AdminController::class, 'panel'])->name('admin.dashboard')->middleware('auth');
 Route::get('/admin/login', function () { return view('adminLogin'); })->name('admin.login');
 Route::post('/admin/login', [AuthController::class, 'adminLogin'])->name('admin.login.submit');
+Route::get('/admin', [AdminController::class, 'panel'])->name('admin.panel');
+Route::put('/admin/configuracion', [AdminController::class, 'updateConfig'])->name('admin.config.update');
+Route::resource('productos', ProductoController::class)->middleware('auth');

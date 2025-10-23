@@ -290,16 +290,19 @@
             </main>
         </div>
 
-        <aside class="cart-panel fixed right-0 top-0 h-full w-full md:w-80 bg-white shadow-xl z-50" id="cartPanel">
+        <aside class="cart-panel fixed right-0 top-0 h-full w-full md:w-80 bg-white shadow-xl z-50 flex flex-col" id="cartPanel">
             <div class="flex justify-between items-center p-4 border-b border-navy-100">
                 <h2 class="text-xl font-semibold text-navy-900">Mi Reserva</h2>
                 <button id="closeCart" class="text-navy-400 hover:text-navy-600"><i class="fas fa-times text-xl"></i></button>
             </div>
             <div class="cart-items flex-1 overflow-auto p-4" id="cartItems">
-                <div class="empty-cart-message text-center text-navy-500 py-12">
-                    <i class="fas fa-utensils fa-3x mb-4 text-navy-200"></i>
-                    <p class="text-base mb-2">Tu carrito está vacío</p>
-                    <button class="inline-flex items-center px-4 py-2 text-navy-600 hover:text-navy-800 font-medium" onclick="closeCart()">
+                <div class="empty-cart-message flex flex-col justify-center items-center h-full text-center text-navy-500">
+                    <div class="bg-navy-50 rounded-full p-8 mb-6 shadow-lg">
+                        <i class="fas fa-utensils fa-4x text-navy-300"></i>
+                    </div>
+                    <p class="text-lg font-medium mb-2 text-navy-600">Tu carrito está vacío </p>
+                    <p class="text-sm text-navy-400 mb-8 max-w-xs">¡Empieza a explorar nuestro menú y agrega tus platos favoritos!</p>
+                    <button class="inline-flex items-center px-6 py-3 bg-[#001F3F] text- #001F3F rounded-lg hover:bg-[#003366] transition-colors font-medium shadow-md" onclick="closeCart()">
                         <i class="fas fa-arrow-left mr-2"></i>Volver al Menú
                     </button>
                 </div>
@@ -428,10 +431,13 @@
 
                 if (cart.length === 0) {
                     cartItems.innerHTML = `
-                        <div class="empty-cart-message text-center text-navy-500 py-12">
-                            <i class="fas fa-utensils fa-3x mb-4 text-navy-200"></i>
-                            <p class="text-base mb-2">Tu carrito está vacío</p>
-                            <button class="inline-flex items-center px-4 py-2 text-navy-600 hover:text-navy-800 font-medium" onclick="closeCart()">
+                        <div class="empty-cart-message flex flex-col justify-center items-center h-full text-center text-navy-500">
+                            <div class="bg-navy-50 rounded-full p-8 mb-6 shadow-lg">
+                                <i class="fas fa-utensils fa-4x text-navy-300"></i>
+                            </div>
+                            <p class="text-lg font-medium mb-2 text-navy-600">Tu carrito está vacío</p>
+                            <p class="text-sm text-navy-400 mb-8 max-w-xs">¡Empieza a explorar nuestro menú y agrega tus platos favoritos!</p>
+                            <button class="inline-flex items-center px-6 py-3 bg-[#001F3F] text-white rounded-lg hover:bg-[#003366] transition-colors font-medium shadow-md" onclick="closeCart()">
                                 <i class="fas fa-arrow-left mr-2"></i>Volver al Menú
                             </button>
                         </div>

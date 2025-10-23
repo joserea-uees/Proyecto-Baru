@@ -10,12 +10,13 @@ class CreatePedidosTable extends Migration
     {
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
+            $table->string('reservation_code')->unique();
+            $table->json('productos')->nullable();
+            $table->string ('estado')->default('pendiente');
             $table->dateTime('fecha_reserva');
-            $table->integer('numero_personas');
-            $table->enum('estado', ['pendiente', 'confirmado', 'cancelado'])->default('pendiente');
-            $table->string('codigo_ticket', 20)->unique();
             $table->text('comentarios')->nullable();
+            $table->decimal('total', 8, 2);
             $table->timestamps();
         });
     }

@@ -8,17 +8,18 @@ class CreateDetallesPedidosTable extends Migration
 {
     public function up()
     {
-        Schema::create('detalles_pedidos', function (Blueprint $table) {
+        Schema::create('detalle_pedidos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pedido_id')->constrained()->onDelete('cascade');
             $table->foreignId('producto_id')->constrained()->onDelete('cascade');
             $table->integer('cantidad');
+            $table->decimal('precio_unitario', 8, 2);
             $table->timestamps();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('detalles_pedidos');
+        Schema::dropIfExists('detalle_pedidos');
     }
 }

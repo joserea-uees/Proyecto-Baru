@@ -2,59 +2,126 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Pedido;
-use App\Models\Producto;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class PedidoController extends Controller
 {
     public function store(Request $request)
     {
-        // Validar los datos del formulario
-        $request->validate([
-            'fecha_reserva' => 'required|date|after:now',
-            'numero_personas' => 'required|integer|min:1',
+        $validated = $request->validate([
+            'reservation_code' => 'required|string|unique:pedidos,reservation_code',
             'productos' => 'required|json',
-            'comentarios' => 'nullable|string|max:500',
+            'fecha_reserva' => 'required|date|after:today',
+            'comentarios' => 'nullable|string',
         ]);
 
-        // Decodificar productos del carrito
         $productos = json_decode($request->productos, true);
-        if (empty($productos)) {
-            return redirect()->route('home')->withErrors(['productos' => 'El carrito está vacío']);
+        $total = 0;
+        foreach ($productos as $producto) {
+            $product = \App\Models\Producto::find($producto['id']);
+            if ($product) {
+                $total += $product->precio * $producto['cantidad'];
+            }
         }
 
-        // Crear el pedido
+        $user = Auth::user();
+        $userRecord = $user ? User::where('codigo_estudiante', $user->codigo_estudiante)->first() : null;
+        if (!$userRecord) {
+            return response()->json(['success' => false, 'message' => 'Usuario no encontrado'], 403);
+        }
+
         $pedido = Pedido::create([
-            'user_id' => Auth::id(),
+            'user_id' => $userRecord->id,
+            'reservation_code' => $request->reservation_code,
+            'productos' => $request->productos,
             'fecha_reserva' => $request->fecha_reserva,
-            'numero_personas' => $request->numero_personas,
-            'estado' => 'pendiente',
-            'codigo_ticket' => 'RES-' . Str::random(8),
             'comentarios' => $request->comentarios,
+            'total' => $total,
+            'estado' => 'pendiente',
         ]);
 
-        // Guardar los detalles del pedido
-        foreach ($productos as $producto) {
-            $pedido->detalles()->create([
-                'producto_id' => $producto['id'],
-                'cantidad' => $producto['cantidad'],
-            ]);
-        }
-
-        // Redirigir al ticket con mensaje de éxito
-        return redirect()->route('pedidos.ticket', $pedido->id)->with('success', 'Reserva creada exitosamente. Código: ' . $pedido->codigo_ticket);
+        return response()->json([
+            'success' => true,
+            'reservation_code' => $pedido->reservation_code,
+            'message' => 'Reserva creada exitosamente',
+        ]);
     }
 
-    public function ticket(Pedido $pedido)
+    public function cancel(Request $request)
     {
-        // Asegurarse de que el usuario solo vea sus propios pedidos
-        if ($pedido->user_id !== Auth::id()) {
-            abort(403, 'No autorizado');
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'No autenticado'], 401);
         }
 
-        return view('pedidos.ticket', compact('pedido'));
+        $reservation_code = $request->input('reservation_code');
+        if (!$reservation_code) {
+            return response()->json(['success' => false, 'message' => 'El código de reserva es requerido'], 422);
+        }
+
+        $query = Pedido::where('reservation_code', $reservation_code);
+        if (!$user->isAdmin()) {
+            $query->where('user_id', $user->id);
+        }
+
+        $pedido = $query->first();
+
+        if (!$pedido) {
+            \Log::warning('Intento de cancelación fallido', [
+                'reservation_code' => $reservation_code,
+                'user_id' => $user->id,
+                'is_admin' => $user->isAdmin(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Reserva no encontrada' . ($user->isAdmin() ? '' : ' o no pertenece al usuario'),
+            ], 404);
+        }
+
+        if ($pedido->estado !== 'pendiente') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solo las reservas pendientes pueden ser canceladas',
+            ], 400);
+        }
+
+        $pedido->update(['estado' => 'cancelado']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Reserva cancelada exitosamente',
+        ]);
+    }
+
+    public function ticket(Request $request, $id)
+    {
+        $user = Auth::user();
+        $userRecord = $user ? User::where('codigo_estudiante', $user->codigo_estudiante)->first() : null;
+        if (!$userRecord) {
+            abort(403, 'Usuario no encontrado');
+        }
+
+        $pedido = Pedido::with('user')
+            ->where('user_id', $userRecord->id)
+            ->findOrFail($id);
+        return view('ticket', compact('pedido'));
+    }
+
+    public function index()
+    {
+        $user = Auth::user();
+        $userRecord = $user ? User::where('codigo_estudiante', $user->codigo_estudiante)->first() : null;
+        if (!$userRecord) {
+            return view('reservas', ['reservas' => collect()]);
+        }
+
+        $reservas = Pedido::where('user_id', $userRecord->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('reservas', compact('reservas'));
     }
 }

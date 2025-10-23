@@ -21,6 +21,7 @@ class AuthController extends Controller
             'name' => $request->nombre,
             'codigo_estudiante' => $request->codigo_estudiante,
             'password' => Hash::make($request->contrasena),
+            'role' => 'user', // Asigna rol 'user' por defecto
         ]);
 
         return redirect()->route('login')->with('success', 'Registro exitoso. Por favor, inicia sesión.');
@@ -34,11 +35,16 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt(['codigo_estudiante' => $request->codigo_estudiante, 'password' => $request->contrasena], $request->has('remember'))) {
-            return redirect()->route('home');
+            $user = Auth::user();
+            if ($user->isAdmin()) {
+                return redirect()->route('admin.dashboard'); // Redirige a la vista de admin
+            }
+            return redirect()->route('home'); // Redirige a la vista de usuario normal
         }
 
         return back()->withErrors(['codigo_estudiante' => 'Credenciales incorrectas']);
     }
+
     public function logout(Request $request)
     {
         Auth::logout();

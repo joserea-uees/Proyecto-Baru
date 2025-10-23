@@ -1,452 +1,222 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BARÚ Food Lounge - Panel de Administrador</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #001F3F 0%, #003366 100%);
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 1rem;
-            box-shadow: 0 20px 60px rgba(0, 31, 63, 0.3);
-            padding: 2rem;
-        }
-        h1 {
-            font-family: 'Playfair Display', serif;
-            color: #001F3F;
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-            position: relative;
-        }
-        h1::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(90deg, #10B981, #059669);
-            margin: 0.5rem auto;
-            border-radius: 2px;
-        }
-        h3 {
-            font-family: 'Inter', sans-serif;
-            color: #001F3F;
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            margin-top: 2rem;
-            display: flex;
-            align-items: center;
-        }
-        h3 i {
-            margin-right: 0.5rem;
-            color: #10B981;
-        }
-        h3:first-of-type {
-            margin-top: 0;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #10B981, #059669);
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
-        }
-        .stat-icon {
-            font-size: 2.5rem;
-            color: #10B981;
-            margin-bottom: 0.5rem;
-        }
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #001F3F;
-            display: block;
-        }
-        .stat-label {
-            color: #4B5563;
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .welcome-text {
-            color: #4B5563;
-            font-size: 1.125rem;
-            font-weight: 400;
-            text-align: center;
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.8s ease-out;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 2rem;
-            background: white;
-            border-radius: 1rem;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #E5E7EB;
-        }
-        th {
-            background: linear-gradient(135deg, #001F3F 0%, #003366 100%);
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        tr:hover {
-            background: #F0FDF4;
-            transform: scale(1.01);
-            transition: all 0.2s ease;
-        }
-        .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            font-size: 0.875rem;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-        .btn:hover::before {
-            left: 100%;
-        }
-        .btn-delete {
-            background: #EF4444;
-            color: white;
-        }
-        .btn-delete:hover {
-            background: #DC2626;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-        .btn-view {
-            background: #10B981;
-            color: white;
-        }
-        .btn-view:hover {
-            background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        .btn-logout {
-            background: linear-gradient(135deg, #6B7280 0%, #4B5568 100%);
-            color: white;
-            width: 100%;
-            max-width: 200px;
-            margin: 2rem auto 0;
-            display: block;
-            padding: 0.75rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-        }
-        .btn-logout:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
-        }
-        .no-applicable {
-            color: #6B7280;
-            font-style: italic;
-        }
-        .fade-in {
-            animation: fadeIn 0.6s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .section-card {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            border: 1px solid #E5E7EB;
-        }
-        .section-card:hover {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-        .search-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid #D1D5DB;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            transition: all 0.2s ease;
-        }
-        .search-input:focus {
-            outline: none;
-            border-color: #10B981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-        }
-        .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 2rem;
-            border-radius: 1rem;
-            width: 80%;
-            max-width: 500px;
-            text-align: center;
-            animation: modalSlideIn 0.3s ease;
-        }
-        @keyframes modalSlideIn {
-            from { opacity: 0; transform: translateY(-50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close:hover {
-            color: #000;
-        }
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 0.5rem;
-            color: white;
-            font-weight: 500;
-            z-index: 1001;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        }
-        .notification.show {
-            transform: translateX(0);
-        }
-        .notification.success {
-            background: #10B981;
-        }
-        .notification.error {
-            background: #EF4444;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Administrativo | BARÚ Food Lounge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Fuente elegante desde Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div class="container fade-in">
-        <h1>BARÚ Food Lounge - Panel de Administrador</h1>
-        <p class="welcome-text" x-data="{ showWelcome: true }" x-show="showWelcome" x-transition>
-            ¡Bienvenido, Admin! Gestiona tu lounge con facilidad.
-        </p>
 
-        <!-- Estadísticas -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <i class="fas fa-shopping-cart stat-icon"></i>
-                <span class="stat-value">25</span>
-                <span class="stat-label">Pedidos Totales</span>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-users stat-icon"></i>
-                <span class="stat-value">3</span>
-                <span class="stat-label">Usuarios Activos</span>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-clock stat-icon"></i>
-                <span class="stat-value">2</span>
-                <span class="stat-label">Pendientes Hoy</span>
-            </div>
-        </div>
-
-        <!-- Lista de usuarios -->
-        <div class="section-card">
-            <h3><i class="fas fa-users"></i>Usuarios Registrados</h3>
-            <input type="text" class="search-input" placeholder="Buscar usuarios..." x-data="{ search: '', users: [
-                {name: 'Juan Pérez', code: 'EST001', role: 'user'},
-                {name: 'María López', code: 'EST002', role: 'user'},
-                {name: 'Admin', code: 'ADMIN001', role: 'admin'}
-            ], filteredUsers() { return this.users.filter(u => u.name.toLowerCase().includes(this.search.toLowerCase()) || u.code.toLowerCase().includes(this.search.toLowerCase())); } }" x-model="search" @input.debounce="search">
-            <div class="overflow-x-auto">
-                <table>
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-user mr-2"></i>Nombre</th>
-                            <th><i class="fas fa-id-badge mr-2"></i>Código Estudiante</th>
-                            <th><i class="fas fa-user-tag mr-2"></i>Rol</th>
-                            <th><i class="fas fa-cogs mr-2"></i>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="user in filteredUsers()" :key="user.code">
-                            <tr>
-                                <td class="font-medium" x-text="user.name"></td>
-                                <td x-text="user.code"></td>
-                                <td class="text-gray-600" x-text="user.role"></td>
-                                <td>
-                                    <template x-if="user.role !== 'admin'">
-                                        <button class="btn btn-delete" @click="if(confirm('¿Estás seguro de eliminar a ' + user.name + '?')) { showNotification('Usuario eliminado exitosamente', 'success'); } else { showNotification('Acción cancelada', 'error'); }">
-                                            <i class="fas fa-trash mr-1"></i>Eliminar
-                                        </button>
-                                    </template>
-                                    <template x-if="user.role === 'admin'">
-                                        <span class="no-applicable">No aplicable</span>
-                                    </template>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Lista de pedidos -->
-        <div class="section-card">
-            <h3><i class="fas fa-receipt"></i>Pedidos Recientes</h3>
-            <div class="overflow-x-auto">
-                <table>
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-hashtag mr-2"></i>ID Pedido</th>
-                            <th><i class="fas fa-user mr-2"></i>Usuario</th>
-                            <th><i class="fas fa-calendar mr-2"></i>Fecha</th>
-                            <th><i class="fas fa-eye mr-2"></i>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="font-medium">#1</td>
-                            <td>Juan Pérez</td>
-                            <td class="text-gray-600">20/10/2025 14:30</td>
-                            <td>
-                                <button class="btn btn-view" onclick="openModal('Detalles del Pedido #1: Plato principal - $15.00, Bebida - $5.00. Total: $20.00. Estado: Completado.')">
-                                    <i class="fas fa-eye mr-1"></i>Ver Ticket
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="font-medium">#2</td>
-                            <td>María López</td>
-                            <td class="text-gray-600">20/10/2025 15:45</td>
-                            <td>
-                                <button class="btn btn-view" onclick="openModal('Detalles del Pedido #2: Ensalada - $12.00, Postre - $8.00. Total: $20.00. Estado: Pendiente.')">
-                                    <i class="fas fa-eye mr-1"></i>Ver Ticket
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Botón de cerrar sesión -->
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-logout">
-                <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
-            </button>
-        </form>
+<body class="bg-gray-100 text-gray-800 font-sans" x-data="{ section: 'dashboard' }">
+  <!-- Sidebar -->
+  <aside class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg flex flex-col z-50">
+    <div class="flex flex-col items-center justify-center h-28 bg-gray-800 text-white">
+      <h2 class="text-lg mt-2" style="font-family: 'Playfair Display', serif;">Admin BARÚ</h2>
     </div>
+    <nav class="flex-1 p-4 space-y-3">
+      <button @click="section = 'dashboard'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900 font-semibold">🏠 Dashboard</button>
+      <button @click="section = 'pedidos'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">📦 Pedidos</button>
+      <button @click="section = 'productos'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">🍽 Productos</button>
+      <button @click="section = 'clientes'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">👥 Clientes</button>
+      <button @click="section = 'configuracion'" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-gray-200 text-gray-900">⚙ Configuración</button>
+      <button @click="alert('Sesión cerrada')" class="w-full text-left block px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white text-gray-900 font-semibold mt-4">🚪 Cerrar Sesión</button>
+    </nav>
+  </aside>
 
-    <!-- Modal para detalles -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 class="text-xl font-bold mb-4">Detalles del Pedido</h2>
-            <p id="modal-text" class="text-gray-700"></p>
+  <!-- Contenido principal -->
+  <div class="ml-64 p-6">
+    <!-- Header -->
+    <header class="flex justify-between items-center bg-white rounded-lg p-4 shadow-sm">
+      <h1 class="text-2xl font-bold text-gray-900">Panel de Control</h1>
+      <div class="flex items-center space-x-4">
+        <span class="text-gray-700 font-medium">Administrador</span>
+      </div>
+    </header>
+
+    <!-- Sección Dashboard -->
+    <section x-show="section === 'dashboard'" x-transition>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+        <div class="bg-white p-5 rounded-xl shadow-md flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-semibold text-gray-500">Pedidos Hoy</h2>
+            <p class="text-2xl font-bold text-gray-900">128</p>
+          </div>
+          <span class="text-gray-700 text-3xl">📦</span>
         </div>
-    </div>
 
-    <!-- Notificación -->
-    <div id="notification" class="notification" x-data="{ show: false, message: '', type: '', showNotification(msg, typ) { this.message = msg; this.type = typ; this.show = true; setTimeout(() => this.show = false, 3000); } }"></div>
+        <div class="bg-white p-5 rounded-xl shadow-md flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-semibold text-gray-500">Ingresos</h2>
+            <p class="text-2xl font-bold text-gray-900">$1,540</p>
+          </div>
+          <span class="text-gray-700 text-3xl">💰</span>
+        </div>
 
-    <script>
-        function openModal(text) {
-            document.getElementById('modal-text').textContent = text;
-            document.getElementById('modal').style.display = 'block';
+        <div class="bg-white p-5 rounded-xl shadow-md flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-semibold text-gray-500">Clientes Nuevos</h2>
+            <p class="text-2xl font-bold text-gray-900">42</p>
+          </div>
+          <span class="text-gray-700 text-3xl">👥</span>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow-md flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-semibold text-gray-500">Reseñas Positivas</h2>
+            <p class="text-2xl font-bold text-gray-900">96%</p>
+          </div>
+          <span class="text-gray-700 text-3xl">⭐</span>
+        </div>
+      </div>
+
+      <!-- Gráficas -->
+      <section class="p-6 bg-white rounded-xl shadow-lg mt-10">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6 text-center">📊 Estadísticas del Restaurante</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="bg-white rounded-lg p-4 shadow-md border">
+            <h3 class="text-lg font-medium text-center text-gray-700 mb-2">Ventas Semanales</h3>
+            <canvas id="barChart"></canvas>
+          </div>
+          <div class="bg-white rounded-lg p-4 shadow-md border">
+            <h3 class="text-lg font-medium text-center text-gray-700 mb-2">Productos Más Pedidos</h3>
+            <canvas id="pieChart"></canvas>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- Sección Pedidos -->
+    <section x-show="section === 'pedidos'" x-transition>
+      <div class="mt-10 bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">📋 Últimos Pedidos</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-100 text-gray-700 uppercase text-sm">
+                <th class="py-3 px-4">ID</th>
+                <th class="py-3 px-4">Cliente</th>
+                <th class="py-3 px-4">Producto</th>
+                <th class="py-3 px-4">Total</th>
+                <th class="py-3 px-4">Estado</th>
+                <th class="py-3 px-4">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b hover:bg-gray-50">
+                <td class="py-3 px-4">#001</td>
+                <td class="py-3 px-4">Carlos Ruiz</td>
+                <td class="py-3 px-4">Pizza Hawaiana</td>
+                <td class="py-3 px-4">$14.00</td>
+                <td class="py-3 px-4 text-green-500 font-semibold">Completado</td>
+                <td class="py-3 px-4">22/10/2025</td>
+              </tr>
+              <tr class="border-b hover:bg-gray-50">
+                <td class="py-3 px-4">#002</td>
+                <td class="py-3 px-4">María López</td>
+                <td class="py-3 px-4">Hamburguesa Doble</td>
+                <td class="py-3 px-4">$10.50</td>
+                <td class="py-3 px-4 text-yellow-400 font-semibold">Pendiente</td>
+                <td class="py-3 px-4">22/10/2025</td>
+              </tr>
+              <tr class="border-b hover:bg-gray-50">
+                <td class="py-3 px-4">#003</td>
+                <td class="py-3 px-4">Ana Torres</td>
+                <td class="py-3 px-4">Taco Especial</td>
+                <td class="py-3 px-4">$12.00</td>
+                <td class="py-3 px-4 text-red-500 font-semibold">Cancelado</td>
+                <td class="py-3 px-4">21/10/2025</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Secciones vacías -->
+    <section x-show="section === 'productos'" class="mt-10" x-transition>
+      <div class="bg-white p-6 rounded-xl shadow-md">
+        <h2 class="text-xl font-semibold text-gray-900">🍽 Gestión de Productos</h2>
+        <p class="text-gray-600 mt-2">Aquí podrás añadir, editar o eliminar productos del menú.</p>
+      </div>
+    </section>
+
+    <section x-show="section === 'clientes'" class="mt-10" x-transition>
+      <div class="bg-white p-6 rounded-xl shadow-md">
+        <h2 class="text-xl font-semibold text-gray-900">👥 Gestión de Clientes</h2>
+        <p class="text-gray-600 mt-2">Listado y detalles de tus clientes frecuentes.</p>
+      </div>
+    </section>
+
+    <section x-show="section === 'configuracion'" class="mt-10" x-transition>
+      <div class="bg-white p-6 rounded-xl shadow-md">
+        <h2 class="text-xl font-semibold text-gray-900">⚙ Configuración</h2>
+        <p class="text-gray-600 mt-2">Preferencias del sistema y ajustes generales.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Chart.js scripts -->
+  <script>
+    const chartColors = {
+      green: '#22c55e',
+      yellow: '#facc15',
+      red: '#ef4444',
+      blue: '#3b82f6',
+      purple: '#8b5cf6',
+      orange: '#f97316'
+    };
+
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+        datasets: [{
+          label: 'Ventas ($)',
+          data: [120, 190, 300, 250, 320, 400, 280],
+          backgroundColor: chartColors.blue,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#111827' } },
+          y: { ticks: { color: '#111827' }, grid: { color: '#E5E7EB' } }
         }
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
+      }
+    });
+
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Hamburguesas', 'Pizzas', 'Tacos', 'Ensaladas', 'Postres'],
+        datasets: [{
+          label: 'Pedidos',
+          data: [35, 50, 25, 15, 30],
+          backgroundColor: [
+            chartColors.blue,
+            chartColors.green,
+            chartColors.yellow,
+            chartColors.red,
+            chartColors.purple
+          ],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#111827' } }
         }
-        window.onclick = function(event) {
-            const modal = document.getElementById('modal');
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
